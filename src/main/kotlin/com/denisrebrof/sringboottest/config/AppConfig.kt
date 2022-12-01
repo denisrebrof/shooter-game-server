@@ -1,6 +1,5 @@
-package com.denisrebrof.sringboottest
+package com.denisrebrof.sringboottest.config
 
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration

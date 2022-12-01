@@ -1,4 +1,4 @@
-package com.denisrebrof.sringboottest.data.model
+package com.denisrebrof.sringboottest.user.model
 
 import javax.persistence.*
 

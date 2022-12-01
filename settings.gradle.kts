@@ -1,1 +1,1 @@
-rootProject.name = "sring-boot-test"
+rootProject.name = "spring-boot-test"
