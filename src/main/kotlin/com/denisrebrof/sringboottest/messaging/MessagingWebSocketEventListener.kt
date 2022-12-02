@@ -19,12 +19,12 @@ class MessagingWebSocketEventListener {
     private val logger = LoggerFactory.getLogger(MessagingWebSocketEventListener::class.java)
 
     @EventListener
-    fun handleWebSocketConnectListener(event: SessionConnectedEvent) {
+    fun onConnected(event: SessionConnectedEvent) {
         logger.info("New connection created!")
     }
 
     @EventListener
-    fun handleWebSocketConnectListener(event: SessionDisconnectEvent) {
+    fun onDisconnected(event: SessionDisconnectEvent) {
         val headerAccessor = StompHeaderAccessor.wrap(event.message)
         val username = headerAccessor
             .sessionAttributes
