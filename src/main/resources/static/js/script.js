@@ -1,6 +1,3 @@
-import SockJS from 'sockjs-client'
-import {Stomp} from '@stomp/stompjs'
-
 let stompClient
 let username
 
@@ -9,6 +6,7 @@ function connect(user) {
     username = user
     const socket = new SockJS('/chat-example')
     stompClient = Stomp.over(socket)
+    stompClient.debug = f => f;
     stompClient.connect({}, onConnected, onError)
 }
 
