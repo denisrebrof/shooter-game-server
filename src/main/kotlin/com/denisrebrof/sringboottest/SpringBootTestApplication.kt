@@ -20,7 +20,7 @@ class SpringBootTestApplication(
         ).forEach(usersRepository::save)
 
         val context = ClassPathXmlApplicationContext("applicationContext.xml")
-        val userBean = context.getBean("test", ChatMessage::class.java)
+        val userBean = context.getBean(ChatMessage::class.java)
         println(userBean)
     }
 }
