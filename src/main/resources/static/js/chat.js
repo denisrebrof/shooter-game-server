@@ -1,8 +1,9 @@
 let stompClient
 let username
+let sessionId
 
 function connect(user) {
-    console.log("Connect...")
+    console.log("Connect.....")
     username = user
     const socket = new SockJS('/chat-example')
     stompClient = Stomp.over(socket)
@@ -11,7 +12,14 @@ function connect(user) {
 }
 
 const onConnected = () => {
+    let url = stompClient.ws._transport.url
+    console.log("Url is: " + url);
+    const urlParts = url.split("/")
+    sessionId = urlParts[urlParts.length - 2]
+    console.log("Your current session is: " + sessionId);
+
     stompClient.subscribe('/topic/public', onMessageReceived)
+    stompClient.subscribe('/user/' + sessionId + "/direct", onDirectMessageReceived)
 
     let connectedMessage = JSON.stringify({
             sender: username,
@@ -38,6 +46,32 @@ function sendMessage(messageContent) {
     }
     console.log("Send message " + chatMessage)
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage))
+}
+
+function sendDirectMessage(messageContent, receiver) {
+    if (!(messageContent && receiver && stompClient))
+        return
+
+    const chatMessage = {
+        sender: username,
+        content: messageContent,
+        messageType: 'CHAT',
+        receiverId: receiver,
+        time: moment().calendar()
+    }
+    console.log("Send direct message " + chatMessage)
+    stompClient.send("/app/chat.send.direct", {}, JSON.stringify(chatMessage))
+}
+
+const onDirectMessageReceived = (payload) => {
+    const message = JSON.parse(payload.body);
+    if (message.messageType === 'CONNECT') {
+        console.warn(message.sender + " connected!")
+    } else if (message.messageType === 'DISCONNECT') {
+        console.warn(message.sender + " disconnected!")
+    } else {
+        console.log("DirectMessage from " + message.sender + " at " + message.time + ": " + message.content)
+    }
 }
 
 const onMessageReceived = (payload) => {
