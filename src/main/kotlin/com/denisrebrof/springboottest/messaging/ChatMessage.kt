@@ -1,4 +1,4 @@
-package com.denisrebrof.sringboottest.messaging
+package com.denisrebrof.springboottest.messaging
 
 import java.util.*
 

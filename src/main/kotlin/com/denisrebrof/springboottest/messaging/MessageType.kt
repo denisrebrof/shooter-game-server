@@ -1,4 +1,4 @@
-package com.denisrebrof.sringboottest.messaging
+package com.denisrebrof.springboottest.messaging
 
 enum class MessageType {
     CHAT,

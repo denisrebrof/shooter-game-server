@@ -1,4 +1,4 @@
-package com.denisrebrof.sringboottest.messaging
+package com.denisrebrof.springboottest.messaging
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,6 +1,6 @@
-package com.denisrebrof.sringboottest.user
+package com.denisrebrof.springboottest.user
 
-import com.denisrebrof.sringboottest.user.model.User
+import com.denisrebrof.springboottest.user.model.User
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface IUserRepository : JpaRepository<User, String> {

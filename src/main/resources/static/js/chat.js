@@ -5,7 +5,7 @@ let sessionId
 function connect(user) {
     console.log("Connect.....")
     username = user
-    const socket = new SockJS('/chat-example')
+    const socket = new SockJS('/chat')
     stompClient = Stomp.over(socket)
     stompClient.debug = f => f;
     stompClient.connect({}, onConnected, onError)

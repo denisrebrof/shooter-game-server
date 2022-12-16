@@ -1,7 +1,7 @@
-package com.denisrebrof.sringboottest.user
+package com.denisrebrof.springboottest.user
 
-import com.denisrebrof.sringboottest.user.model.User
-import com.denisrebrof.sringboottest.user.model.UserRole
+import com.denisrebrof.springboottest.user.model.User
+import com.denisrebrof.springboottest.user.model.UserRole
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
