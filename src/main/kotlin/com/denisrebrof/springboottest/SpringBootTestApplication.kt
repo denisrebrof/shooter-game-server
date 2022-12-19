@@ -22,7 +22,7 @@ class SpringBootTestApplication(
 
     private fun createTestUser(username: String) = User(
         username = username,
-        password = passwordEncoder.encode("$username-password"),
+        password = passwordEncoder.encode("p$username"),
         role = UserRole.Admin
     )
 }
