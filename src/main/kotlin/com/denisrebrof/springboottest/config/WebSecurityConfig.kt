@@ -11,10 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 
-
 @Configuration
 @EnableWebSecurity
-class SecurityConfiguration @Autowired constructor(
+class WebSecurityConfig @Autowired constructor(
     private val userDetailsService: SecurityUserDetailsService,
 ) {
     @Autowired
@@ -29,16 +28,19 @@ class SecurityConfiguration @Autowired constructor(
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
-    fun filterChain(@Autowired http: HttpSecurity): SecurityFilterChain {
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
         return http
-            .authorizeRequests()
-            .antMatchers("/login").permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .formLogin().permitAll()
+            .authorizeHttpRequests { registry ->
+                registry.requestMatchers("/login").permitAll()
+                registry.requestMatchers("/chat").permitAll()
+                registry.anyRequest().authenticated()
+            }
+            .formLogin()
             .and()
             .httpBasic()
             .and()
+            .csrf()
+            .disable()
             .build()
     }
 }

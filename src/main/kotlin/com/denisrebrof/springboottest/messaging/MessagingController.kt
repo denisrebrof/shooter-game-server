@@ -12,20 +12,20 @@ import org.springframework.stereotype.Controller
 @Controller
 class MessagingController {
 
-    @Autowired
-    private lateinit var simpMessagingTemplate: SimpMessagingTemplate
-
-    @MessageMapping("/chat.send.direct")
-    fun sendMessageDirect(
-        @Payload chatMessage: ChatMessage,
-        @Header("simpSessionId") sessionId: String
-    ) {
-        simpMessagingTemplate.convertAndSendToUser(
-            chatMessage.receiverId,
-            "/direct",
-            chatMessage
-        )
-    }
+//    @Autowired
+//    private lateinit var simpMessagingTemplate: SimpMessagingTemplate
+//
+//    @MessageMapping("/chat.send.direct")
+//    fun sendMessageDirect(
+//        @Payload chatMessage: ChatMessage,
+//        @Header("simpSessionId") sessionId: String
+//    ) {
+//        simpMessagingTemplate.convertAndSendToUser(
+//            chatMessage.receiverId,
+//            "/direct",
+//            chatMessage
+//        )
+//    }
 
     @MessageMapping("/chat.send")
     @SendTo("/topic/public")

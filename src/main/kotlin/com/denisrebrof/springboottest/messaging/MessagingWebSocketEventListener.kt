@@ -13,8 +13,8 @@ import kotlin.reflect.safeCast
 @Component
 class MessagingWebSocketEventListener {
 
-    @Autowired
-    private lateinit var sendingOperations: SimpMessageSendingOperations
+//    @Autowired
+//    private lateinit var sendingOperations: SimpMessageSendingOperations
 
     private val logger = LoggerFactory.getLogger(MessagingWebSocketEventListener::class.java)
 
@@ -33,7 +33,7 @@ class MessagingWebSocketEventListener {
             ?: "undefined"
 
         val message = ChatMessage(MessageType.DISCONNECT, username)
-        sendingOperations.convertAndSend("/topic/public", message)
+//        sendingOperations.convertAndSend("/topic/public", message)
         logger.info("Disconnect!")
     }
 }
