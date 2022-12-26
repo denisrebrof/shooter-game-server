@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.7.6"
     id("io.spring.dependency-management") version "1.0.15.RELEASE"
+    kotlin("plugin.serialization") version "1.7.20"
     kotlin("kapt") version "1.7.21"
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
@@ -32,6 +33,8 @@ allprojects {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -54,6 +57,10 @@ dependencies {
     implementation("org.projectlombok:lombok:1.18.24")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+
+    implementation("io.reactivex.rxjava3:rxjava:3.1.5")
 }
 
 tasks.withType<KotlinCompile> {

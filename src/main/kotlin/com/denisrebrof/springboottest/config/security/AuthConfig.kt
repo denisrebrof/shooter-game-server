@@ -1,28 +1,34 @@
-package com.denisrebrof.springboottest.config
+package com.denisrebrof.springboottest.config.security
 
 import com.denisrebrof.springboottest.user.IUserRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
-import org.springframework.stereotype.Service
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 
-@Service
-class SecurityUserDetailsService @Autowired constructor(
+@Configuration
+class AuthConfig @Autowired constructor(
     private val userRepository: IUserRepository
-) : UserDetailsService {
+) {
 
-    override fun loadUserByUsername(username: String?): UserDetails {
+    @Bean
+    fun userDetailsService() = UserDetailsService { username ->
         username ?: throw UsernameNotFoundException("username is null")
         val user = userRepository
             .findUserByUsername(username)
             .firstOrNull()
             ?: throw UsernameNotFoundException("User with username $username not found")
-        return User
+        User
             .withUsername(user.username)
             .password(user.password)
             .roles("USER")
             .build()
     }
+
+    @Bean
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 }

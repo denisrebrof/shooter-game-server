@@ -17,7 +17,8 @@ class SpringBootTestApplication(
 
     override fun run(args: ApplicationArguments?) {
         val user = createTestUser("dr")
-        arrayOf(user).forEach(usersRepository::save)
+        val user2 = createTestUser("ik")
+        arrayOf(user, user2).forEach(usersRepository::save)
     }
 
     private fun createTestUser(username: String) = User(

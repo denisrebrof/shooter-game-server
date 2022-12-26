@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest.config
+package com.denisrebrof.springboottest.config.security
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,9 +13,8 @@ class WebSocketSecurityConfig {
     @Bean
     fun messageAuthorizationManager(
         messages: MessageMatcherDelegatingAuthorizationManager.Builder
-    ): AuthorizationManager<Message<*>> {
-        messages.simpDestMatchers("/user/**").authenticated()
-        messages.simpDestMatchers("/chat").permitAll()
-        return messages.build()
-    }
+    ): AuthorizationManager<Message<*>> = messages
+        .anyMessage()
+        .authenticated()
+        .build()
 }
