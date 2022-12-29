@@ -1,13 +1,15 @@
 package com.denisrebrof.springboottest.tictac.gateways
 
-import com.denisrebrof.springboottest.commands.domain.model.WSCommandId
-import com.denisrebrof.springboottest.commands.gateways.WSEmptyRequestHandler
-import com.denisrebrof.springboottest.commands.gateways.WSRequestHandler.ResponseState.NoResponse
+import com.denisrebrof.springboottest.commands.domain.model.ResponseErrorCodes
+import com.denisrebrof.springboottest.commands.domain.model.ResponseState
+import com.denisrebrof.springboottest.commands.domain.model.ResponseState.NoResponse
+import com.denisrebrof.springboottest.commands.domain.model.WSCommand
 import com.denisrebrof.springboottest.tictac.domain.TicTacUserGameUseCase
 import com.denisrebrof.springboottest.tictac.domain.model.GameState
 import com.denisrebrof.springboottest.tictac.domain.model.TicTacGame
 import com.denisrebrof.springboottest.tictac.gateways.model.TicTacGameStateResponse
-import com.denisrebrof.springboottest.user.IUserRepository
+import com.denisrebrof.springboottest.user.domain.repositories.IUserRepository
+import com.denisrebrof.springboottest.user.gateways.WSUserEmptyRequestHandler
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,9 +20,14 @@ import kotlin.reflect.safeCast
 class TicTacGameStateRequestHandler @Autowired constructor(
     private val gameUseCase: TicTacUserGameUseCase,
     private val userRepository: IUserRepository
-) : WSEmptyRequestHandler(WSCommandId.TicTacState.id) {
+) : WSUserEmptyRequestHandler(WSCommand.TicTacState.id) {
 
     private val mapper = CellCodeMapper()
+
+    private val userNotFoundResponse = ResponseState.ErrorResponse(
+        code = ResponseErrorCodes.Internal.code,
+        exception = Exception("Could not find opponent")
+    )
 
     override fun handleMessage(userId: Long): ResponseState {
         val game = gameUseCase.get(userId) ?: return NoResponse
@@ -29,15 +36,13 @@ class TicTacGameStateRequestHandler @Autowired constructor(
             .let(GameState.ActiveTurn::class::safeCast)
             ?.turnUserId
 
-        val opponentId = game
+        val opponentName = game
             .participantIds
             .filterNot(userId::equals)
             .firstOrNull()
-            ?: return NoResponse
-
-        userRepository
-            .findUserById(opponentId)
-            .username
+            ?.let(userRepository::findUserById)
+            ?.username
+            ?: return userNotFoundResponse
 
         val winnerId = game.state.let(GameState.Finished::class::safeCast)?.winnerId
         val response = TicTacGameStateResponse(
@@ -46,7 +51,7 @@ class TicTacGameStateRequestHandler @Autowired constructor(
             isWinner = winnerId?.let(userId::equals) ?: false,
             gridSize = game.size,
             gameState = game.state.id,
-            opponentNick = userRepository.findUserById(opponentId).username
+            opponentNick = opponentName
         )
         return response
             .let(Json::encodeToString)

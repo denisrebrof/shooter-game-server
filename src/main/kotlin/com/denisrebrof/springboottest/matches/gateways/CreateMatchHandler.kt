@@ -1,7 +1,7 @@
 package com.denisrebrof.springboottest.matches.gateways
 
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository
-import com.denisrebrof.springboottest.matches.domain.MatchRepository
+import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.matches.domain.model.Match
 import com.denisrebrof.springboottest.utils.DisposableService
 import com.denisrebrof.springboottest.utils.subscribeDefault
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class CreateMatchHandler @Autowired constructor(
-    private val matchRepository: MatchRepository,
+    private val matchRepository: IMatchRepository,
     private val lobbyRepository: LobbyRepository
 ) : DisposableService() {
 

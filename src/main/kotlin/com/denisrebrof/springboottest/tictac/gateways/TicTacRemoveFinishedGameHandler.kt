@@ -1,6 +1,6 @@
 package com.denisrebrof.springboottest.tictac.gateways
 
-import com.denisrebrof.springboottest.matches.domain.MatchRepository
+import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.tictac.domain.TicTacGameRepository
 import com.denisrebrof.springboottest.tictac.domain.TicTacGameRepository.GameUpdateType
 import com.denisrebrof.springboottest.tictac.domain.model.GameState
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 @Service
 class TicTacRemoveFinishedGameHandler @Autowired constructor(
     gameRepository: TicTacGameRepository,
-    private val matchRepository: MatchRepository
+    private val matchRepository: IMatchRepository
 ) : DisposableService() {
 
     private val disposedMatchIds = mutableSetOf<String>()

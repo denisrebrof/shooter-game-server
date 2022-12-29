@@ -14,6 +14,7 @@ class WebSecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         return http
             .authorizeHttpRequests { registry ->
+                registry.requestMatchers("/websocket").permitAll()
                 registry.anyRequest().authenticated()
             }
             .anonymous().disable()

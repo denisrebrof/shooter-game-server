@@ -1,12 +1,13 @@
 package com.denisrebrof.springboottest.tictac.gateways
 
-import com.denisrebrof.springboottest.commands.domain.model.WSCommandId
-import com.denisrebrof.springboottest.commands.gateways.WSNotificationService
+import com.denisrebrof.springboottest.commands.domain.model.NotificationContent
+import com.denisrebrof.springboottest.commands.domain.model.WSCommand
 import com.denisrebrof.springboottest.tictac.domain.TicTacGameRepository
 import com.denisrebrof.springboottest.tictac.domain.TicTacGameRepository.GameUpdateType
 import com.denisrebrof.springboottest.tictac.domain.model.GameState
 import com.denisrebrof.springboottest.tictac.domain.model.TicTacGame
 import com.denisrebrof.springboottest.tictac.gateways.model.TicTacFinishedStateResponse
+import com.denisrebrof.springboottest.user.domain.SendUserNotificationUseCase
 import com.denisrebrof.springboottest.utils.DisposableService
 import com.denisrebrof.springboottest.utils.subscribeDefault
 import io.reactivex.rxjava3.disposables.Disposable
@@ -19,7 +20,7 @@ import kotlin.reflect.safeCast
 @Service
 class TicTacFinishedStateNotifier @Autowired constructor(
     gamesRepository: TicTacGameRepository,
-    private val notificationService: WSNotificationService
+    private val sendUserNotificationUseCase: SendUserNotificationUseCase
 ) : DisposableService() {
     override val handler: Disposable = gamesRepository
         .getUpdates()
@@ -29,12 +30,22 @@ class TicTacFinishedStateNotifier @Autowired constructor(
         .subscribeDefault(::notifyGameFinished)
 
     private fun notifyGameFinished(game: TicTacGame) {
-        val finishedState = game.state.let(GameState.Finished::class::safeCast) ?: return
+        val finishedState = game
+            .state
+            .let(GameState.Finished::class::safeCast)
+            ?: return
+
         game.participantIds.forEach { participantId ->
             val isWinner = participantId == finishedState.winnerId
             val response = TicTacFinishedStateResponse(true, isWinner)
-            val responseText = response.let(Json::encodeToString)
-            notificationService.send(participantId, WSCommandId.TicTacFinished.id, responseText)
+            val responseContent = response
+                .let(Json::encodeToString)
+                .let(NotificationContent::Data)
+            sendUserNotificationUseCase.send(
+                userId = participantId,
+                commandId = WSCommand.TicTacFinished.id,
+                content = responseContent
+            )
         }
     }
 }

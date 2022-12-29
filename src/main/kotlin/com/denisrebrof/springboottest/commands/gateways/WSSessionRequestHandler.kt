@@ -1,14 +1,16 @@
 package com.denisrebrof.springboottest.commands.gateways
 
-abstract class WSRequestHandler<MESSAGE_DATA : Any>(open val id: Long) {
+import com.denisrebrof.springboottest.commands.domain.model.ResponseState
+
+abstract class WSSessionRequestHandler<MESSAGE_DATA : Any>(open val id: Long) {
 
     @Throws
     protected abstract fun parseData(data: String): MESSAGE_DATA
 
-    protected abstract fun handleMessage(userId: Long, data: MESSAGE_DATA): ResponseState
+    protected abstract fun handleMessage(sessionId: String, data: MESSAGE_DATA): ResponseState
 
     internal fun handleRawMessage(
-        userId: Long,
+        sessionId: String,
         data: String
     ): HandleRawMessageResult {
         val messageData = kotlin
@@ -17,12 +19,7 @@ abstract class WSRequestHandler<MESSAGE_DATA : Any>(open val id: Long) {
             .getOrNull()
             ?: return HandleRawMessageResult.InvalidData
 
-        return handleMessage(userId, messageData).let(HandleRawMessageResult::Success)
-    }
-
-    sealed class ResponseState {
-        object NoResponse : ResponseState()
-        data class CreatedResponse(val response: String) : ResponseState()
+        return handleMessage(sessionId, messageData).let(HandleRawMessageResult::Success)
     }
 
     internal sealed class HandleRawMessageResult {

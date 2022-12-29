@@ -1,6 +1,6 @@
 package com.denisrebrof.springboottest.userdata.domain.model
 
-import com.denisrebrof.springboottest.user.model.User
+import com.denisrebrof.springboottest.user.domain.model.User
 import kotlinx.serialization.Serializable
 
 @Serializable

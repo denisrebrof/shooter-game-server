@@ -1,11 +1,12 @@
 package com.denisrebrof.springboottest.lobby.gateways
 
-import com.denisrebrof.springboottest.commands.domain.model.WSCommandId
-import com.denisrebrof.springboottest.commands.gateways.WSNotificationService
+import com.denisrebrof.springboottest.commands.domain.model.NotificationContent
+import com.denisrebrof.springboottest.commands.domain.model.WSCommand
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository.LobbyUpdate
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository.LobbyUpdate.LobbyUpdateType
 import com.denisrebrof.springboottest.lobby.domain.model.LobbyUserState
+import com.denisrebrof.springboottest.user.domain.SendUserNotificationUseCase
 import com.denisrebrof.springboottest.utils.DisposableService
 import com.denisrebrof.springboottest.utils.subscribeDefault
 import io.reactivex.rxjava3.disposables.Disposable
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class LobbyUpdatesNotifier @Autowired constructor(
-    private val notificationService: WSNotificationService,
+    private val sendUserNotificationUseCase: SendUserNotificationUseCase,
     lobbyRepository: LobbyRepository
 ) : DisposableService() {
 
@@ -27,10 +28,10 @@ class LobbyUpdatesNotifier @Autowired constructor(
             LobbyUpdateType.Join -> LobbyUserState.Joined
             LobbyUpdateType.Left -> LobbyUserState.NotIn
         }
-        notificationService.send(
-            update.userId,
-            WSCommandId.LobbyState.id,
-            state.code.toString()
+        sendUserNotificationUseCase.send(
+            userId = update.userId,
+            commandId = WSCommand.LobbyState.id,
+            content = state.code.toString().let(NotificationContent::Data)
         )
     }
 }

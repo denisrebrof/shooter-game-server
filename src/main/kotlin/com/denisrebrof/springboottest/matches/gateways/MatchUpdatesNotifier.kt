@@ -1,11 +1,12 @@
 package com.denisrebrof.springboottest.matches.gateways
 
-import com.denisrebrof.springboottest.commands.domain.model.WSCommandId
-import com.denisrebrof.springboottest.commands.gateways.WSNotificationService
-import com.denisrebrof.springboottest.matches.domain.MatchRepository
-import com.denisrebrof.springboottest.matches.domain.MatchRepository.MatchUpdate
-import com.denisrebrof.springboottest.matches.domain.MatchRepository.MatchUpdate.UpdateType
+import com.denisrebrof.springboottest.commands.domain.model.NotificationContent
+import com.denisrebrof.springboottest.commands.domain.model.WSCommand
+import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.matches.domain.model.Match
+import com.denisrebrof.springboottest.matches.domain.model.MatchUpdate
+import com.denisrebrof.springboottest.matches.domain.model.MatchUpdate.UpdateType
+import com.denisrebrof.springboottest.user.domain.SendUserNotificationUseCase
 import com.denisrebrof.springboottest.utils.DisposableService
 import com.denisrebrof.springboottest.utils.subscribeDefault
 import io.reactivex.rxjava3.disposables.Disposable
@@ -16,8 +17,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class MatchUpdatesNotifier @Autowired constructor(
-    private val notificationService: WSNotificationService,
-    matchRepository: MatchRepository
+    private val sendUserNotificationUseCase: SendUserNotificationUseCase,
+    matchRepository: IMatchRepository
 ) : DisposableService() {
 
     private val emptyMatch = Match(
@@ -32,12 +33,12 @@ class MatchUpdatesNotifier @Autowired constructor(
         .subscribeDefault(::handle)
 
     private fun handle(update: MatchUpdate) {
-        val messageData = when (update.type) {
+        val messageContent = when (update.type) {
             UpdateType.Created -> update.match
             UpdateType.Removed -> emptyMatch
-        }.let(Json::encodeToString)
+        }.let(Json::encodeToString).let(NotificationContent::Data)
         update.match.participantIds.forEach { userId ->
-            notificationService.send(userId, WSCommandId.GetMatch.id, messageData)
+            sendUserNotificationUseCase.send(userId, WSCommand.GetMatch.id, messageContent)
         }
     }
 }

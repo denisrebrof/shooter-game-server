@@ -1,11 +1,12 @@
 package com.denisrebrof.springboottest.matches.gateways
 
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository
-import com.denisrebrof.springboottest.matches.domain.MatchRepository
-import com.denisrebrof.springboottest.matches.domain.MatchRepository.MatchUpdate.UpdateType
+import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.matches.domain.model.Match
-import com.denisrebrof.springboottest.session.domain.WSSessionRepository
-import com.denisrebrof.springboottest.session.domain.WSSessionRepository.SessionState
+import com.denisrebrof.springboottest.matches.domain.model.MatchUpdate
+import com.denisrebrof.springboottest.matches.domain.model.MatchUpdate.UpdateType
+import com.denisrebrof.springboottest.user.data.WSUserSessionRepository
+import com.denisrebrof.springboottest.user.domain.repositories.IWSUserSessionRepository.UserSessionState
 import com.denisrebrof.springboottest.utils.DisposableService
 import com.denisrebrof.springboottest.utils.filterIsTrue
 import com.denisrebrof.springboottest.utils.subscribeDefault
@@ -17,15 +18,15 @@ import kotlin.reflect.cast
 
 @Service
 class RemoveEmptyMatchHandler @Autowired constructor(
-    private val matchRepository: MatchRepository,
+    private val matchRepository: IMatchRepository,
     private val lobbyRepository: LobbyRepository,
-    private val sessionRepository: WSSessionRepository
+    private val sessionRepository: WSUserSessionRepository
 ) : DisposableService() {
 
     private val createdMatchesFlow = matchRepository
         .getMatchUpdates()
         .filter { it.type == UpdateType.Created }
-        .map(MatchRepository.MatchUpdate::match)
+        .map(MatchUpdate::match)
 
     override val handler = createdMatchesFlow
         .flatMapMaybe(::getEverybodyLeftMaybe)
@@ -40,7 +41,7 @@ class RemoveEmptyMatchHandler @Autowired constructor(
             .map(sessionRepository::getSessionFlow)
         val onlineStatesFlow = Flowable
             .combineLatest(sessionStateFlows, ::castToSessionStates)
-            .map { it.map { state -> state is SessionState.SessionExists } }
+            .map { it.map { state -> state is UserSessionState.Exists } }
         val everybodyLeftMaybe = onlineStatesFlow
             .map { states -> states.all { online -> !online } }
             .filterIsTrue()
@@ -48,7 +49,7 @@ class RemoveEmptyMatchHandler @Autowired constructor(
         val matchFinishedMaybe = matchRepository
             .getMatchUpdates()
             .filter { update -> update.match.id == match.id }
-            .map(MatchRepository.MatchUpdate::type)
+            .map(MatchUpdate::type)
             .filter(UpdateType.Removed::equals)
             .map { false }
             .firstElement()
@@ -59,5 +60,5 @@ class RemoveEmptyMatchHandler @Autowired constructor(
     }
 
     private fun castToSessionStates(input: Array<Any>) = input
-        .map(SessionState::class::cast)
+        .map(UserSessionState::class::cast)
 }

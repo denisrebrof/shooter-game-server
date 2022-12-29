@@ -1,8 +1,9 @@
 package com.denisrebrof.springboottest.tictac.domain
 
-import com.denisrebrof.springboottest.commands.domain.model.WSCommandId
-import com.denisrebrof.springboottest.commands.gateways.WSNotificationService
+import com.denisrebrof.springboottest.commands.domain.model.NotificationContent
+import com.denisrebrof.springboottest.commands.domain.model.WSCommand
 import com.denisrebrof.springboottest.tictac.domain.model.GameState
+import com.denisrebrof.springboottest.user.domain.SendUserNotificationUseCase
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,7 +14,7 @@ import com.denisrebrof.springboottest.tictac.gateways.model.TicTacCellUpdateResp
 @Service
 class TicTacMakeTurnUseCase @Autowired constructor(
     private val gameUseCase: TicTacUserGameUseCase,
-    private val notificationService: WSNotificationService
+    private val sendNotificationUseCase: SendUserNotificationUseCase
 ) {
     fun makeTurn(userId: Long, cellIndex: Int): Boolean {
         var game = gameUseCase
@@ -68,18 +69,18 @@ class TicTacMakeTurnUseCase @Autowired constructor(
     private fun sendCellUpdate(
         participantId: Long,
         response: CellUpdateResponse
-    ) = notificationService.send(
+    ) = sendNotificationUseCase.send(
         userId = participantId,
-        commandId = WSCommandId.TicTacCellUpdates.id,
-        data = Json.encodeToString(response)
+        commandId = WSCommand.TicTacCellUpdates.id,
+        content = Json.encodeToString(response).let(NotificationContent::Data)
     )
 
     private fun sendTurnUpdate(
         participantId: Long,
         isUserTurn: Boolean
-    ) = notificationService.send(
+    ) = sendNotificationUseCase.send(
         userId = participantId,
-        commandId = WSCommandId.TicTacTurnUpdates.id,
-        data = isUserTurn.toString()
+        commandId = WSCommand.TicTacTurnUpdates.id,
+        content = isUserTurn.toString().let(NotificationContent::Data)
     )
 }

@@ -1,6 +1,6 @@
 package com.denisrebrof.springboottest.config.security
 
-import com.denisrebrof.springboottest.user.IUserRepository
+import com.denisrebrof.springboottest.user.domain.repositories.IUserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

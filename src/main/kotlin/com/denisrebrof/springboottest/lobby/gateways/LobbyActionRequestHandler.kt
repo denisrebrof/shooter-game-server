@@ -1,16 +1,16 @@
 package com.denisrebrof.springboottest.lobby.gateways
 
-import com.denisrebrof.springboottest.commands.domain.model.WSCommandId
-import com.denisrebrof.springboottest.commands.gateways.WSRequestHandler
+import com.denisrebrof.springboottest.commands.domain.model.WSCommand
+import com.denisrebrof.springboottest.commands.domain.model.ResponseState
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository
-import com.denisrebrof.springboottest.user.model.User
+import com.denisrebrof.springboottest.user.gateways.WSUserRequestHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 class LobbyActionRequestHandler @Autowired constructor(
     private val lobbyRepository: LobbyRepository
-) : WSRequestHandler<LobbyActionRequestHandler.Intent>(WSCommandId.LobbyAction.id) {
+) : WSUserRequestHandler<LobbyActionRequestHandler.Intent>(WSCommand.LobbyAction.id) {
 
     override fun parseData(data: String): Intent {
         val intentCode = data.toLong()

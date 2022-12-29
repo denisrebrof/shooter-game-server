@@ -1,9 +1,9 @@
 package com.denisrebrof.springboottest.commands.gateways
 
-import com.denisrebrof.springboottest.commands.domain.RequestsRepository
-import com.denisrebrof.springboottest.commands.domain.model.RequestData
-import com.denisrebrof.springboottest.commands.gateways.WSRequestHandler.HandleRawMessageResult
-import com.denisrebrof.springboottest.user.model.User
+import com.denisrebrof.springboottest.commands.domain.model.Notification
+import com.denisrebrof.springboottest.commands.domain.model.NotificationContent
+import com.denisrebrof.springboottest.commands.domain.model.ResponseState
+import com.denisrebrof.springboottest.commands.gateways.WSSessionRequestHandler.HandleRawMessageResult
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.TextMessage
@@ -12,12 +12,12 @@ import kotlin.reflect.safeCast
 
 @Service
 class WSRequestsRouter @Autowired constructor(
-    private val handlers: List<WSRequestHandler<*>>,
-    private val requestsRepository: RequestsRepository
+    private val handlers: List<WSSessionRequestHandler<*>>,
+    private val notificationService: WSNotificationService
 ) {
 
     fun sendRequest(
-        userId: Long,
+        sessionId: String,
         message: WebSocketMessage<*>
     ): MessageRoutingResult {
         val textPayload = message.textPayload ?: return MessageRoutingResult.InvalidMessage
@@ -36,7 +36,7 @@ class WSRequestsRouter @Autowired constructor(
             ?: return MessageRoutingResult.HandlerNotFound
 
         val contentText = payloadSegments[1]
-        val handleResult = handler.handleRawMessage(userId, contentText)
+        val handleResult = handler.handleRawMessage(sessionId, contentText)
         if (handleResult is HandleRawMessageResult.InvalidData)
             return MessageRoutingResult.DataParsingError
 
@@ -49,13 +49,22 @@ class WSRequestsRouter @Autowired constructor(
             ?.response
             ?: return MessageRoutingResult.Delivered
 
-        val responseData = responseState
-            .let(WSRequestHandler.ResponseState.CreatedResponse::class::safeCast)
-            ?.response
+        val responseData = getNotificationContent(responseState)
             ?: return MessageRoutingResult.Delivered
 
-        RequestData(userId, commandIdCode, responseData, responseId).let(requestsRepository::add)
+        Notification(
+            sessionId = sessionId,
+            commandId = commandIdCode,
+            content = responseData,
+            responseId = responseId
+        ).let(notificationService::send)
         return MessageRoutingResult.Delivered
+    }
+
+    private fun getNotificationContent(responseState: ResponseState): NotificationContent? = when (responseState) {
+        is ResponseState.CreatedResponse -> NotificationContent.Data(responseState.response)
+        is ResponseState.ErrorResponse -> NotificationContent.Error(responseState.code, responseState.exception)
+        ResponseState.NoResponse -> null
     }
 
     private val WebSocketMessage<*>.textPayload: String?

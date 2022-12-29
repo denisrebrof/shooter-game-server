@@ -1,31 +1,22 @@
 package com.denisrebrof.springboottest
 
-import com.denisrebrof.springboottest.user.IUserRepository
-import com.denisrebrof.springboottest.user.model.User
-import com.denisrebrof.springboottest.user.model.UserRole
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.runApplication
-import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
+import javax.servlet.ServletContext
 
 @SpringBootApplication
-class SpringBootTestApplication(
-    private val usersRepository: IUserRepository,
-    private val passwordEncoder: PasswordEncoder
-) : ApplicationRunner {
+class SpringBootTestApplication : SpringBootServletInitializer() {
 
-    override fun run(args: ApplicationArguments?) {
-        val user = createTestUser("dr")
-        val user2 = createTestUser("ik")
-        arrayOf(user, user2).forEach(usersRepository::save)
+    override fun onStartup(servletContext: ServletContext) {
+        super.onStartup(servletContext)
+        println("Debug startup")
     }
 
-    private fun createTestUser(username: String) = User(
-        username = username,
-        password = passwordEncoder.encode("p$username"),
-        role = UserRole.Admin
-    )
+    override fun configure(builder: SpringApplicationBuilder?): SpringApplicationBuilder {
+        return builder!!.sources(SpringBootTestApplication::class.java)
+    }
 }
 
 fun main(args: Array<String>) {

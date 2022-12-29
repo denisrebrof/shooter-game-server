@@ -1,15 +1,16 @@
 package com.denisrebrof.springboottest.tictac.gateways
 
-import com.denisrebrof.springboottest.commands.domain.model.WSCommandId
-import com.denisrebrof.springboottest.commands.gateways.WSRequestHandler
+import com.denisrebrof.springboottest.commands.domain.model.ResponseState
+import com.denisrebrof.springboottest.commands.domain.model.WSCommand
 import com.denisrebrof.springboottest.tictac.domain.TicTacMakeTurnUseCase
+import com.denisrebrof.springboottest.user.gateways.WSUserRequestHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 class TicTacMakeTurnRequestHandler @Autowired constructor(
     private val turnUseCase: TicTacMakeTurnUseCase
-) : WSRequestHandler<Int>(WSCommandId.TicTacMakeTurn.id) {
+) : WSUserRequestHandler<Int>(WSCommand.TicTacMakeTurn.id) {
 
     override fun parseData(data: String): Int = data.toInt()
 
