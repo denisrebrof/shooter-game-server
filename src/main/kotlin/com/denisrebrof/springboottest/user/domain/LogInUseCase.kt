@@ -22,12 +22,20 @@ class LogInUseCase @Autowired constructor(
     ): LoginResult = when (authParams) {
         is AuthParams.Token -> tokenLogin(authParams.token)
         is AuthParams.YandexId -> yandexLogin(authParams.id, sessionId)
+        is AuthParams.Anonymous -> anonymousLogin(authParams.id, sessionId)
         is AuthParams.UsernamePassword -> defaultLogin(authParams.username, authParams.password)
-        AuthParams.Anonymous -> anonymousLogin()
     }
 
-    private fun anonymousLogin(): LoginResult {
-        return LoginResult.Failed
+    private fun anonymousLogin(localId: String, sessionId: String): LoginResult {
+        if (localId.isBlank())
+            return LoginResult.Failed
+
+        val user = userRepository
+            .findUserByLocalId(localId)
+            ?: createLocalUser(localId)
+        val userId = user.id ?: return LoginResult.Failed
+        sessionMappingRepository.addMapping(userId, sessionId)
+        return LoginResult.Success("")
     }
 
     private fun yandexLogin(yandexId: String, sessionId: String): LoginResult {
@@ -38,6 +46,11 @@ class LogInUseCase @Autowired constructor(
         sessionMappingRepository.addMapping(userId, sessionId)
         return LoginResult.Success("")
     }
+
+    private fun createLocalUser(localId: String) = User(
+        username = "User_$localId",
+        localId = localId
+    ).let(userRepository::save)
 
     private fun createYandexUser(yandexId: String) = User(
         username = "User_$yandexId",

@@ -29,23 +29,27 @@ class TicTacFinishedStateNotifier @Autowired constructor(
         .onBackpressureBuffer()
         .subscribeDefault(::notifyGameFinished)
 
-    private fun notifyGameFinished(game: TicTacGame) {
-        val finishedState = game
-            .state
-            .let(GameState.Finished::class::safeCast)
-            ?: return
+    private fun notifyGameFinished(game: TicTacGame) = with(game) {
+        if (!state.finished)
+            return
 
+        val winnerId = state.let(GameState.HasWinner::class::safeCast)?.winnerId
+        val isDraw = state is GameState.Draw
         game.participantIds.forEach { participantId ->
-            val isWinner = participantId == finishedState.winnerId
-            val response = TicTacFinishedStateResponse(true, isWinner)
-            val responseContent = response
-                .let(Json::encodeToString)
-                .let(NotificationContent::Data)
-            sendUserNotificationUseCase.send(
-                userId = participantId,
-                commandId = WSCommand.TicTacFinished.id,
-                content = responseContent
-            )
+            val isWinner = !isDraw && participantId == winnerId
+            val response = TicTacFinishedStateResponse(true, isWinner, isDraw)
+            sendGameFinishedNotification(participantId, response)
         }
+    }
+
+    private fun sendGameFinishedNotification(userId: Long, response: TicTacFinishedStateResponse) {
+        val responseContent = response
+            .let(Json::encodeToString)
+            .let(NotificationContent::Data)
+        sendUserNotificationUseCase.send(
+            userId = userId,
+            commandId = WSCommand.TicTacFinished.id,
+            content = responseContent
+        )
     }
 }

@@ -11,7 +11,8 @@ data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val yandexId: String = ""
+    val yandexId: String = "",
+    val localId: String = ""
 ) {
     override fun toString(): String {
         return "User id=$id username=$username"

@@ -44,7 +44,7 @@ class TicTacGameStateRequestHandler @Autowired constructor(
             ?.username
             ?: return userNotFoundResponse
 
-        val winnerId = game.state.let(GameState.Finished::class::safeCast)?.winnerId
+        val winnerId = game.state.let(GameState.HasWinner::class::safeCast)?.winnerId
         val response = TicTacGameStateResponse(
             cellStates = getCellStates(game, userId),
             isPlayerTurn = activeTurnPlayerId?.let(userId::equals) ?: false,

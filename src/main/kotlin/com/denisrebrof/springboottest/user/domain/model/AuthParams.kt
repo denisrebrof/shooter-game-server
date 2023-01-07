@@ -8,7 +8,7 @@ sealed class AuthParams {
 
     data class YandexId(val id: String) : AuthParams()
 
-    object Anonymous : AuthParams()
+    data class Anonymous(val id: String) : AuthParams()
 
     data class Token(val token: String) : AuthParams()
 }

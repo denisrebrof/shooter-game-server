@@ -52,10 +52,13 @@ class TicTacMakeTurnUseCase @Autowired constructor(
             .firstOrNull()
             ?: return false
 
-        val gameState = TicTacWinnerDelegate
-            .getWinnerId(cellStates, game.size)
-            ?.let(GameState::Finished)
-            ?: GameState.ActiveTurn(opponentId)
+        val winnerId = TicTacWinnerDelegate.getWinnerId(cellStates, game.size)
+
+        val gameState = when {
+            winnerId != null -> GameState.HasWinner(winnerId)
+            cellStates.none(0L::equals) -> GameState.Draw
+            else -> GameState.ActiveTurn(opponentId)
+        }
 
         participants
             .associateWith(opponentId::equals)

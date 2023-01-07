@@ -29,6 +29,7 @@ class WSLogInRequestHandler @Autowired constructor(
 
     override fun handleMessage(sessionId: String, data: AuthParamsData): ResponseState = with(data) {
         val params = when {
+            localId.isNotBlank() -> Anonymous(localId)
             yandexId.isNotBlank() -> YandexId(yandexId)
             token.isNotBlank() -> Token(token)
             username.isNotBlank() && password.isNotBlank() -> UsernamePassword(username, password)
@@ -55,6 +56,7 @@ class WSLogInRequestHandler @Autowired constructor(
     @Serializable
     data class AuthParamsData(
         val yandexId: String = "",
+        val localId: String = "",
         val username: String = "",
         val password: String = "",
         val token: String = "",

@@ -25,6 +25,10 @@ repositories {
     mavenCentral()
 }
 
+springBoot {
+    mainClass.set("com.denisrebrof.springboottest.SpringBootTestApplication")
+}
+
 allprojects {
     ext {
        set("spring-security.version", "5.8.1")

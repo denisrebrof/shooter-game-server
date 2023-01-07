@@ -7,8 +7,9 @@ data class TicTacGame(
     val state: GameState = participantIds.firstOrNull()?.let(GameState::ActiveTurn) ?: GameState.Undefined
 )
 
-sealed class GameState(val id: Int) {
-    object Undefined : GameState(0)
-    data class ActiveTurn(val turnUserId: Long) : GameState(1)
-    data class Finished(val winnerId: Long) : GameState(2)
+sealed class GameState(val id: Int, val finished: Boolean) {
+    object Undefined : GameState(0, false)
+    data class ActiveTurn(val turnUserId: Long) : GameState(1, false)
+    data class HasWinner(val winnerId: Long) : GameState(2, true)
+    object Draw : GameState(3, true)
 }

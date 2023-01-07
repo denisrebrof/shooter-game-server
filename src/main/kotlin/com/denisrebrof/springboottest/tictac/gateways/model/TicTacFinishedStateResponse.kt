@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data class TicTacFinishedStateResponse(
     private val finished: Boolean,
     private val isWinner: Boolean,
+    private val isDraw: Boolean,
 )

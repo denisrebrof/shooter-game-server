@@ -2,8 +2,8 @@ package com.denisrebrof.springboottest.tictac.gateways
 
 import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.tictac.domain.TicTacGameRepository
+import com.denisrebrof.springboottest.tictac.domain.TicTacGameRepository.GameUpdate
 import com.denisrebrof.springboottest.tictac.domain.TicTacGameRepository.GameUpdateType
-import com.denisrebrof.springboottest.tictac.domain.model.GameState
 import com.denisrebrof.springboottest.utils.DisposableService
 import com.denisrebrof.springboottest.utils.filterNot
 import com.denisrebrof.springboottest.utils.subscribeDefault
@@ -24,8 +24,8 @@ class TicTacRemoveFinishedGameHandler @Autowired constructor(
     override val handler: Disposable = gameRepository
         .getUpdates()
         .filter { it.type == GameUpdateType.Updated }
-        .filter { it.game.state is GameState.Finished }
-        .map(TicTacGameRepository.GameUpdate::matchId)
+        .filter { it.game.state.finished }
+        .map(GameUpdate::matchId)
         .filterNot(disposedMatchIds::contains)
         .flatMapMaybe(::startMatchDisposeTimer)
         .onBackpressureBuffer()
