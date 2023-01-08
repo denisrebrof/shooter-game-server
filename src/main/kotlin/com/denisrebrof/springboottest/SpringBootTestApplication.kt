@@ -14,9 +14,8 @@ class SpringBootTestApplication : SpringBootServletInitializer() {
         println("Debug startup")
     }
 
-    override fun configure(builder: SpringApplicationBuilder?): SpringApplicationBuilder {
-        return builder!!.sources(SpringBootTestApplication::class.java)
-    }
+    override fun configure(builder: SpringApplicationBuilder?): SpringApplicationBuilder = builder!!
+        .sources(SpringBootTestApplication::class.java)
 }
 
 fun main(args: Array<String>) {
