@@ -45,6 +45,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-messaging")
 
+    implementation("mysql:mysql-connector-java")
+
     implementation("javax.servlet:javax.servlet-api:4.0.1")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
