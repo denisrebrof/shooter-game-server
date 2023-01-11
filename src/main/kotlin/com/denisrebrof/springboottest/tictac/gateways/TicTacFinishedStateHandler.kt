@@ -1,5 +1,7 @@
 package com.denisrebrof.springboottest.tictac.gateways
 
+import com.denisrebrof.springboottest.balance.data.CurrencyType
+import com.denisrebrof.springboottest.balance.domain.IncreaseBalanceUseCase
 import com.denisrebrof.springboottest.commands.domain.model.NotificationContent
 import com.denisrebrof.springboottest.commands.domain.model.WSCommand
 import com.denisrebrof.springboottest.tictac.domain.TicTacGameRepository
@@ -18,9 +20,10 @@ import org.springframework.stereotype.Service
 import kotlin.reflect.safeCast
 
 @Service
-class TicTacFinishedStateNotifier @Autowired constructor(
+class TicTacFinishedStateHandler @Autowired constructor(
     gamesRepository: TicTacGameRepository,
-    private val sendUserNotificationUseCase: SendUserNotificationUseCase
+    private val sendUserNotificationUseCase: SendUserNotificationUseCase,
+    private val increaseBalanceUseCase: IncreaseBalanceUseCase,
 ) : DisposableService() {
     override val handler: Disposable = gamesRepository
         .getUpdates()
@@ -35,11 +38,18 @@ class TicTacFinishedStateNotifier @Autowired constructor(
 
         val winnerId = state.let(GameState.HasWinner::class::safeCast)?.winnerId
         val isDraw = state is GameState.Draw
+
         game.participantIds.forEach { participantId ->
             val isWinner = !isDraw && participantId == winnerId
-            val response = TicTacFinishedStateResponse(true, isWinner, isDraw)
+            val reward = if (isWinner) GameReward else 0L
+            val response = TicTacFinishedStateResponse(true, isWinner, isDraw, reward)
             sendGameFinishedNotification(participantId, response)
         }
+
+        if (winnerId == null)
+            return@with
+
+        increaseBalanceUseCase.increase(winnerId, GameReward, CurrencyType.Primary.id)
     }
 
     private fun sendGameFinishedNotification(userId: Long, response: TicTacFinishedStateResponse) {
@@ -51,5 +61,9 @@ class TicTacFinishedStateNotifier @Autowired constructor(
             commandId = WSCommand.TicTacFinished.id,
             content = responseContent
         )
+    }
+
+    companion object {
+        private const val GameReward = 10L
     }
 }

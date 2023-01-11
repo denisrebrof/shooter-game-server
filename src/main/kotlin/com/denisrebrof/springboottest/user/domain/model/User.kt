@@ -1,20 +1,34 @@
 package com.denisrebrof.springboottest.user.domain.model
 
-import javax.persistence.*
-
-@Entity
-@Table(name = "users")
 data class User(
-    val username: String,
+    val id: Long = 0L,
+    val username: String = "",
     val password: String = "",
     val role: UserRole = UserRole.Default,
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-    val yandexId: String = "",
-    val localId: String = ""
+    val identities: Map<UserIdentityType, String> = mapOf()
+)
+
+data class UserIdentity(
+    val id: String,
+    val type: UserIdentityType
 ) {
-    override fun toString(): String {
-        return "User id=$id username=$username"
+    companion object {
+        fun fromUserId(userId: Long): UserIdentity {
+            val id = userId.toString()
+            return UserIdentity(id, UserIdentityType.Id)
+        }
     }
+}
+
+enum class UserIdentityType {
+    Id,
+    LocalId,
+    YandexId,
+    Token,
+    Username
+}
+
+enum class UserRole {
+    Default,
+    Admin
 }

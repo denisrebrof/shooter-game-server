@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest.userdata.domain.model
+package com.denisrebrof.springboottest.user.gateways.model
 
 import com.denisrebrof.springboottest.user.domain.model.User
 import kotlinx.serialization.Serializable

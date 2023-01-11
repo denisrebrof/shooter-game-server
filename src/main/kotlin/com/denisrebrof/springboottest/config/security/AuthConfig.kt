@@ -1,5 +1,7 @@
 package com.denisrebrof.springboottest.config.security
 
+import com.denisrebrof.springboottest.user.domain.model.UserIdentity
+import com.denisrebrof.springboottest.user.domain.model.UserIdentityType
 import com.denisrebrof.springboottest.user.domain.repositories.IUserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -18,9 +20,9 @@ class AuthConfig @Autowired constructor(
     @Bean
     fun userDetailsService() = UserDetailsService { username ->
         username ?: throw UsernameNotFoundException("username is null")
-        val user = userRepository
-            .findUserByUsername(username)
-            .firstOrNull()
+
+        val user = UserIdentity(username, UserIdentityType.Username)
+            .let(userRepository::find)
             ?: throw UsernameNotFoundException("User with username $username not found")
         User
             .withUsername(user.username)

@@ -8,6 +8,8 @@ import com.denisrebrof.springboottest.tictac.domain.TicTacUserGameUseCase
 import com.denisrebrof.springboottest.tictac.domain.model.GameState
 import com.denisrebrof.springboottest.tictac.domain.model.TicTacGame
 import com.denisrebrof.springboottest.tictac.gateways.model.TicTacGameStateResponse
+import com.denisrebrof.springboottest.user.domain.model.UserIdentity
+import com.denisrebrof.springboottest.user.domain.model.UserIdentityType
 import com.denisrebrof.springboottest.user.domain.repositories.IUserRepository
 import com.denisrebrof.springboottest.user.gateways.WSUserEmptyRequestHandler
 import kotlinx.serialization.encodeToString
@@ -36,11 +38,15 @@ class TicTacGameStateRequestHandler @Autowired constructor(
             .let(GameState.ActiveTurn::class::safeCast)
             ?.turnUserId
 
-        val opponentName = game
+        val opponentId = game
             .participantIds
             .filterNot(userId::equals)
             .firstOrNull()
-            ?.let(userRepository::findUserById)
+            ?.toString()
+            ?: return userNotFoundResponse
+
+        val opponentName = UserIdentity(opponentId, UserIdentityType.Id)
+            .let(userRepository::find)
             ?.username
             ?: return userNotFoundResponse
 

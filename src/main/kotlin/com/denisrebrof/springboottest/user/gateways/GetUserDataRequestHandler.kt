@@ -1,11 +1,11 @@
-package com.denisrebrof.springboottest.userdata.gateways
+package com.denisrebrof.springboottest.user.gateways
 
 import com.denisrebrof.springboottest.commands.domain.model.ResponseErrorCodes
 import com.denisrebrof.springboottest.commands.domain.model.ResponseState
 import com.denisrebrof.springboottest.commands.domain.model.WSCommand
+import com.denisrebrof.springboottest.user.domain.model.UserIdentity
 import com.denisrebrof.springboottest.user.domain.repositories.IUserRepository
-import com.denisrebrof.springboottest.user.gateways.WSUserEmptyRequestHandler
-import com.denisrebrof.springboottest.userdata.domain.model.UserData
+import com.denisrebrof.springboottest.user.gateways.model.UserData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,8 +22,9 @@ class GetUserDataRequestHandler @Autowired constructor(
     )
 
     override fun handleMessage(userId: Long): ResponseState {
-        val user = userRepository
-            .findUserById(userId)
+        val user = UserIdentity
+            .fromUserId(userId)
+            .let(userRepository::find)
             ?: return userNotFoundResponse
 
         return UserData.fromUser(user)

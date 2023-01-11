@@ -12,4 +12,6 @@ enum class WSCommand(val id: Long) {
     TicTacTurnUpdates(12L),
     TicTacMakeTurn(13L),
     TicTacFinished(14L),
+
+    BalanceState(15L),
 }
