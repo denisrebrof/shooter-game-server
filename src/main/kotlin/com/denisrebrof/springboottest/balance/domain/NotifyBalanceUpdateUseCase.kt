@@ -17,7 +17,7 @@ class NotifyBalanceUpdateUseCase @Autowired constructor(
     fun notify(userId: Long) {
         val notification = userBalancesUseCase
             .getCurrencyBalances(userId)
-            .let(::BalanceResponse)
+            .let(BalanceResponse.Companion::fromCurrencies)
             .let(Json::encodeToString)
             .let(NotificationContent::Data)
 

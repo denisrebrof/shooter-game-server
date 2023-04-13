@@ -1,7 +1,7 @@
 package com.denisrebrof.springboottest.session.gateways
 
 import com.denisrebrof.springboottest.commands.gateways.WSRequestsRouter
-import com.denisrebrof.springboottest.session.data.WSConnectedSessionRepository
+import com.denisrebrof.springboottest.session.domain.IWSConnectedSessionRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.CloseStatus
@@ -11,7 +11,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 
 @Service
 class WSHandler @Autowired constructor(
-    private val connectedSessionRepository: WSConnectedSessionRepository,
+    private val connectedSessionRepository: IWSConnectedSessionRepository,
     private val notificationsService: WSRequestsRouter
 ) : TextWebSocketHandler() {
 

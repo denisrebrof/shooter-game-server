@@ -17,7 +17,7 @@ class BalanceStateRequestHandler @Autowired constructor(
 
     override fun handleMessage(userId: Long): ResponseState = userBalancesUseCase
         .getCurrencyBalances(userId)
-        .let(::BalanceResponse)
+        .let(BalanceResponse.Companion::fromCurrencies)
         .let(Json::encodeToString)
         .let(ResponseState::CreatedResponse)
 }
