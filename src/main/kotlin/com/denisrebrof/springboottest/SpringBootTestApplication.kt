@@ -16,8 +16,12 @@ class SpringBootTestApplication : SpringBootServletInitializer() {
 
     override fun configure(builder: SpringApplicationBuilder?): SpringApplicationBuilder = builder!!
         .sources(SpringBootTestApplication::class.java)
+
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            runApplication<SpringBootTestApplication>(*args)
+        }
+    }
 }
 
-fun main(args: Array<String>) {
-    runApplication<SpringBootTestApplication>(*args)
-}
