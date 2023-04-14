@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    war
     id("org.springframework.boot") version "2.7.6"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("plugin.serialization") version "1.7.20"
@@ -39,7 +38,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
 
     implementation("org.springframework.boot:spring-boot-starter-web")
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -61,6 +59,11 @@ dependencies {
     implementation("io.reactivex.rxjava3:rxjava:3.1.5")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+//Disable plain jar
+tasks.getByName<Jar>("jar") {
+    enabled = false
 }
 
 tasks.withType<KotlinCompile> {
