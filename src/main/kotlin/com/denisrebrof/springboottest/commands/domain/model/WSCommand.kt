@@ -6,12 +6,5 @@ enum class WSCommand(val id: Long) {
     LobbyAction(2L),
     LobbyState(3L),
     GetMatch(4L),
-
-    TicTacState(10L),
-    TicTacCellUpdates(11L),
-    TicTacTurnUpdates(12L),
-    TicTacMakeTurn(13L),
-    TicTacFinished(14L),
-
-    BalanceState(15L),
+    BalanceState(5L),
 }
