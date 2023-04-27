@@ -2,7 +2,9 @@ package com.denisrebrof.springboottest.balance.domain
 
 import com.denisrebrof.springboottest.balance.domain.repositories.IBalanceRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
+@Service
 class DecreaseBalanceUseCase @Autowired constructor(
     private val notifyBalanceUpdateUseCase: NotifyBalanceUpdateUseCase,
     private val balanceStateRepository: IBalanceRepository

@@ -7,4 +7,9 @@ enum class WSCommand(val id: Long) {
     LobbyState(3L),
     GetMatch(4L),
     BalanceState(5L),
+
+    FightFinished(6L),
+    SetMovementData(7L),
+    SetAttackDirection(8L),
+    FightGameUpdate(9L)
 }

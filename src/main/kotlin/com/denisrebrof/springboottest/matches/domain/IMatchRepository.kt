@@ -10,5 +10,4 @@ interface IMatchRepository {
     fun remove(matchId: String)
     fun getMatchUpdates(): Flowable<MatchUpdate>
     fun getMatchIdByUserId(userID: Long): String?
-
 }
