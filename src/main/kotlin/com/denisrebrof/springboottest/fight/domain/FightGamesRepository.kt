@@ -13,17 +13,19 @@ class FightGamesRepository {
     private val updates = PublishProcessor.create<GameUpdate>()
 
     fun set(matchId: String, game: FightGame) {
+        matchIdToGame[matchId]?.dispose()
         val existingGame = matchIdToGame.containsKey(matchId)
         val updateType = when {
-            existingGame -> GameUpdateType.Updated
+            existingGame -> GameUpdateType.Replaced
             else -> GameUpdateType.Created
         }
+
         matchIdToGame[matchId] = game
         GameUpdate(matchId, game, updateType).let(updates::onNext)
     }
 
     fun remove(matchId: String) {
-        val game = matchIdToGame.remove(matchId) ?: return
+        val game = matchIdToGame.remove(matchId)?.also(FightGame::dispose) ?: return
         GameUpdate(matchId, game, GameUpdateType.Created).let(updates::onNext)
     }
 
@@ -39,7 +41,7 @@ class FightGamesRepository {
 
     enum class GameUpdateType {
         Created,
-        Updated,
+        Replaced,
         Removed
     }
 }

@@ -58,7 +58,10 @@ dependencies {
 
     implementation("io.reactivex.rxjava3:rxjava:3.1.5")
 
+    implementation("io.arrow-kt:arrow-core:1.2.0-RC")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
 }
 
 //Disable plain jar

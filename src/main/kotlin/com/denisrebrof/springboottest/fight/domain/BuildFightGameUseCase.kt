@@ -14,9 +14,11 @@ class BuildFightGameUseCase @Autowired constructor(
     }
 
     fun createGame(participantIds: List<Long>): FightGame {
+        var offset = defaultOffset
         val playerStates = participantIds.associateWith { playerId ->
             val intents = FighterIntent(defaultDirection, MovementDirection.None)
-            val state = FighterState.Preparing(defaultOffset)
+            val state = FighterState.Preparing(offset)
+            offset *= -1
             PlayerState(intents, state)
         }
         return FightGame(playerStates)
