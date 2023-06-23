@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest.hideandseekgame
+package com.denisrebrof.springboottest.game.domain
 
 import com.denisrebrof.springboottest.utils.subscribeOnIO
 import com.denisrebrof.springboottest.utils.subscribeWithLogError

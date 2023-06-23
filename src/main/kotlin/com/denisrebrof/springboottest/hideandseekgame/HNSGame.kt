@@ -1,11 +1,10 @@
 package com.denisrebrof.springboottest.hideandseekgame
 
-import com.denisrebrof.springboottest.hideandseekgame.core.Role
-import com.denisrebrof.springboottest.hideandseekgame.core.SleepPlace
-import com.denisrebrof.springboottest.hideandseekgame.core.Transform
-import com.denisrebrof.springboottest.hideandseekgame.round.HideAndSeekRound
-import com.denisrebrof.springboottest.hideandseekgame.round.HideAndSeekRoundSettings
-import com.denisrebrof.springboottest.hideandseekgame.round.RoundEvent
+import com.denisrebrof.springboottest.game.domain.GameBase
+import com.denisrebrof.springboottest.hideandseekgame.model.Role
+import com.denisrebrof.springboottest.game.domain.model.Transform
+import com.denisrebrof.springboottest.hideandseekgame.model.RoundEvent
+import com.denisrebrof.springboottest.hideandseekgame.model.SleepPlace
 import com.denisrebrof.springboottest.user.domain.model.User
 import com.denisrebrof.springboottest.utils.subscribeOnIO
 import com.denisrebrof.springboottest.utils.subscribeWithLogError
@@ -15,7 +14,7 @@ import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.processors.PublishProcessor
 import java.util.concurrent.TimeUnit
 
-class Game(
+class HNSGame(
     private val users: List<User>,
     private val settings: GameSettings,
 ) : GameBase<GameState>(GameState.Pending) {
@@ -36,23 +35,23 @@ class Game(
         .just(assignRoles())
         .delay(settings.settingRolesDurationMs, TimeUnit.MILLISECONDS)
 
-    private fun createRound(playerRoles: Map<Long, Role>) = HideAndSeekRound(
+    private fun createRound(playerRoles: Map<Long, Role>) = HNSRound(
         playerRoles = playerRoles,
         sleepPlaces = settings.sleepPlaces,
-        durationMs = settings.gameDurationMs,
         settings = settings.roundSettings,
+        durationMs = settings.gameDurationMs,
     )
-        .also(HideAndSeekRound::start)
+        .also(HNSRound::start)
         .also(::setupStateOutput)
 
-    private fun setUpHiding(playerRoles: Map<Long, Role>): Maybe<HideAndSeekRound> {
+    private fun setUpHiding(playerRoles: Map<Long, Role>): Maybe<HNSRound> {
         val round = createRound(playerRoles).also(::setupInput)
         return Maybe
             .timer(settings.hidingDurationMs, TimeUnit.MILLISECONDS)
             .map { round }
     }
 
-    private fun HideAndSeekRound.sendInput(
+    private fun HNSRound.sendInput(
         input: PlayerInput
     ) = when (input) {
         is PlayerInput.Catch -> tryCatch(input.targetId, input.playerId)
@@ -60,13 +59,13 @@ class Game(
         is PlayerInput.Lay -> tryLay(input.playerId, input.playerId, input.placeId)
     }
 
-    private fun setupStateOutput(round: HideAndSeekRound) = round
+    private fun setupStateOutput(round: HNSRound) = round
         .events
         .subscribeOnIO()
         .subscribeWithLogError(roundEventsProcessor::onNext)
         .let(gameLifecycle::add)
 
-    private fun setupInput(round: HideAndSeekRound) {
+    private fun setupInput(round: HNSRound) {
         val inputHandler = inputProcessor
             .doOnNext { input -> round.sendInput(input) }
             .ignoreElements()
@@ -81,8 +80,8 @@ class Game(
             .let(gameLifecycle::add)
     }
 
-    private fun setUpSearching(round: HideAndSeekRound): Maybe<RoundEvent.Finished> = round
-        .also(HideAndSeekRound::startSearching)
+    private fun setUpSearching(round: HNSRound): Maybe<RoundEvent.Finished> = round
+        .also(HNSRound::startSearching)
         .events
         .ofType(RoundEvent.Finished::class.java)
         .firstElement()
@@ -107,7 +106,7 @@ class Game(
 data class GameSettings(
     val roles: List<Role>,
     val sleepPlaces: Map<Long, SleepPlace>,
-    val roundSettings: HideAndSeekRoundSettings = HideAndSeekRoundSettings(),
+    val roundSettings: HNSRoundSettings = HNSRoundSettings(),
     val pendingDurationMs: Long = 3000L,
     val settingRolesDurationMs: Long = 3000L,
     val hidingDurationMs: Long = 3000L,

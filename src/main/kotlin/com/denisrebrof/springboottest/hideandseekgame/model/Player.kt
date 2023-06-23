@@ -1,7 +1,6 @@
-package com.denisrebrof.springboottest.hideandseekgame.round
+package com.denisrebrof.springboottest.hideandseekgame.model
 
-import com.denisrebrof.springboottest.hideandseekgame.core.Character
-import com.denisrebrof.springboottest.hideandseekgame.core.Transform
+import com.denisrebrof.springboottest.game.domain.model.Transform
 import kotlin.reflect.safeCast
 
 abstract class Player(

@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest.hideandseekgame.core
+package com.denisrebrof.springboottest.game.domain.model
 
 data class Transform(
     var x: Float,

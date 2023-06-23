@@ -1,5 +1,6 @@
-package com.denisrebrof.springboottest.hideandseekgame.core
+package com.denisrebrof.springboottest.hideandseekgame.model
 
+import com.denisrebrof.springboottest.game.domain.model.Transform
 import com.denisrebrof.springboottest.utils.subscribeOnIO
 import com.denisrebrof.springboottest.utils.subscribeWithLogError
 import io.reactivex.rxjava3.core.Completable
@@ -20,7 +21,6 @@ class SleepPlace(
             else -> sleepingHiderId
         }
 
-
     val isOccupied: Boolean
         get() = sleepDisposable.isDisposed
 
@@ -28,6 +28,7 @@ class SleepPlace(
         hiderId: Long,
         onFinished: () -> Unit
     ): Disposable {
+        release()
         sleepingHiderId = hiderId
         return Completable
             .timer(timerMs, TimeUnit.MILLISECONDS)

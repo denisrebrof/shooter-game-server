@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest.hideandseekgame.round
+package com.denisrebrof.springboottest.game.domain
 
 import com.denisrebrof.springboottest.utils.subscribeOnIO
 import com.denisrebrof.springboottest.utils.subscribeWithLogError
@@ -27,7 +27,8 @@ abstract class RoundBase(
 
     fun start(): Boolean {
         startTime = System.currentTimeMillis()
-        return Flowable.timer(updateIntervalMs, TimeUnit.MILLISECONDS)
+        return Flowable
+            .timer(updateIntervalMs, TimeUnit.MILLISECONDS)
             .repeat()
             .subscribeOnIO()
             .subscribeWithLogError { internalUpdate() }
@@ -46,5 +47,6 @@ abstract class RoundBase(
 
         isFinished = true
         gameUpdateDisposables.clear()
+        onFinished()
     }
 }

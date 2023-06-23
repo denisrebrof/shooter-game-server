@@ -1,4 +1,6 @@
-package com.denisrebrof.springboottest.hideandseekgame.core
+package com.denisrebrof.springboottest.hideandseekgame.model
+
+import com.denisrebrof.springboottest.game.domain.model.Transform
 
 data class Role(
     val character: Character,

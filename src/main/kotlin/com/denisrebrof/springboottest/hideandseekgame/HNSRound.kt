@@ -1,18 +1,17 @@
-package com.denisrebrof.springboottest.hideandseekgame.round
+package com.denisrebrof.springboottest.hideandseekgame
 
-import com.denisrebrof.springboottest.hideandseekgame.core.Character
-import com.denisrebrof.springboottest.hideandseekgame.core.Role
-import com.denisrebrof.springboottest.hideandseekgame.core.SleepPlace
-import com.denisrebrof.springboottest.hideandseekgame.core.Transform
+import com.denisrebrof.springboottest.game.domain.RoundBase
+import com.denisrebrof.springboottest.game.domain.model.Transform
+import com.denisrebrof.springboottest.hideandseekgame.model.*
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.processors.PublishProcessor
 import kotlin.reflect.safeCast
 
-class HideAndSeekRound(
+class HNSRound(
     playerRoles: Map<Long, Role>,
     private val sleepPlaces: Map<Long, SleepPlace>,
-    private val durationMs: Long,
-    private val settings: HideAndSeekRoundSettings,
+    private val settings: HNSRoundSettings,
+    durationMs: Long,
 ) : RoundBase(settings.updateIntervalMs, durationMs) {
 
     private val eventsProcessor = PublishProcessor.create<RoundEvent>()
@@ -58,13 +57,13 @@ class HideAndSeekRound(
 
     private fun createHider(role: Role) = Hider(role.character, role.initialPos)
 
-    private fun finishGame(reason: RoundFinishReason) = finishGame {
+    private fun finishGame(reason: HNSRoundFinishReason) = finishGame {
         RoundEvent.Finished(reason, statsSnapshot).let(eventsProcessor::onNext)
     }
 
     override fun onTimeLeft() {
         super.onTimeLeft()
-        RoundEvent.Finished(RoundFinishReason.TimeLeft, statsSnapshot).let(eventsProcessor::onNext)
+        RoundEvent.Finished(HNSRoundFinishReason.TimeLeft, statsSnapshot).let(eventsProcessor::onNext)
     }
 
     override fun update(timeLeftMs: Long) {
@@ -76,7 +75,7 @@ class HideAndSeekRound(
         if (!allSleeping)
             return
 
-        finishGame(reason = RoundFinishReason.AllHidersSleeping)
+        finishGame(reason = HNSRoundFinishReason.AllHidersSleeping)
     }
 
     private fun removeSeeker(seeker: Seeker) = seeker.run {
@@ -95,7 +94,7 @@ class HideAndSeekRound(
         seekers.forEach { (_, seeker) -> seeker.startSearching() }
     }
 
-    fun stop() = finishGame(RoundFinishReason.Aborted)
+    fun stop() = finishGame(HNSRoundFinishReason.Aborted)
 
     fun tryMove(playerId: Long, pos: Transform) {
         if (isFinished)
@@ -149,7 +148,7 @@ class HideAndSeekRound(
         if (seekers.isNotEmpty() && hiders.isNotEmpty())
             return
 
-        finishGame(RoundFinishReason.UsersLeft)
+        finishGame(HNSRoundFinishReason.UsersLeft)
     }
 
     inner class Hider(character: Character, initialPos: Transform) : HiderBase(character, initialPos) {
@@ -158,13 +157,13 @@ class HideAndSeekRound(
     }
 }
 
-data class HideAndSeekRoundSettings(
+data class HNSRoundSettings(
     val updateIntervalMs: Long = 100L,
     val catchDistance: Float = 1f,
     val layDistance: Float = 1f
 )
 
-enum class RoundFinishReason {
+enum class HNSRoundFinishReason {
     UsersLeft,
     Aborted,
     TimeLeft,
