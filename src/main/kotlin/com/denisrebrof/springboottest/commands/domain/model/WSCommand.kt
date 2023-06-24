@@ -7,4 +7,10 @@ enum class WSCommand(val id: Long) {
     LobbyState(3L),
     GetMatch(4L),
     BalanceState(5L),
+
+    GameState(6L),
+    RoundUpdate(7L),
+    Movement(8L),
+    Catch(9L),
+    LayDown(10L),
 }

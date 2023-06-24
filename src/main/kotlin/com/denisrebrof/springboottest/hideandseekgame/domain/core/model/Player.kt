@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest.hideandseekgame.model
+package com.denisrebrof.springboottest.hideandseekgame.domain.core.model
 
 import com.denisrebrof.springboottest.game.domain.model.Transform
 import kotlin.reflect.safeCast

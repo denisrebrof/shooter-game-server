@@ -1,8 +1,8 @@
-package com.denisrebrof.springboottest.hideandseekgame
+package com.denisrebrof.springboottest.hideandseekgame.domain.core
 
 import com.denisrebrof.springboottest.game.domain.RoundBase
 import com.denisrebrof.springboottest.game.domain.model.Transform
-import com.denisrebrof.springboottest.hideandseekgame.model.*
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.*
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.processors.PublishProcessor
 import kotlin.reflect.safeCast

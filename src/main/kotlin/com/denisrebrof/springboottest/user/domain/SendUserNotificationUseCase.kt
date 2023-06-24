@@ -15,6 +15,14 @@ class SendUserNotificationUseCase @Autowired constructor(
     private val userSessionRepository: IWSUserSessionRepository
 ) {
     fun send(
+        userIds: List<Long>,
+        commandId: Long,
+        content: NotificationContent
+    ) = userIds.forEach { userId ->
+        send(userId, commandId, content)
+    }
+
+    fun send(
         userId: Long,
         commandId: Long,
         content: NotificationContent

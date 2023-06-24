@@ -1,10 +1,13 @@
 package com.denisrebrof.springboottest.hideandseekgame
 
-import com.denisrebrof.springboottest.hideandseekgame.model.Character
-import com.denisrebrof.springboottest.hideandseekgame.model.Role
 import com.denisrebrof.springboottest.game.domain.model.Transform
-import com.denisrebrof.springboottest.hideandseekgame.model.RoundEvent
-import com.denisrebrof.springboottest.user.domain.model.User
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameSettings
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameState
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.HNSGame
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.PlayerInput
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.Character
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.Role
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.RoundEvent
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
@@ -16,16 +19,15 @@ private val defaultSettings = GameSettings(
     ),
     sleepPlaces = mapOf()
 )
-val user1 = User(id = 100)
-val user2 = User(id = 200)
 
-private val defaultUsers = listOf(user1, user2)
+private val defaultUsers = setOf(100L, 200L)
 
 class HNSGameTests {
     @Test
     fun testGameLoopPassesCorrectly() {
         val game = HNSGame(defaultUsers, defaultSettings)
-        game.stateFlow.subscribe { println(it) }
+        game.stateFlow.subscribe(::println)
+        game.getRoundEvents().subscribe { println("round event: $it") }
         game.start()
         game.stateFlow.filter(GameState.Finished::equals).blockingFirst()
         assert(true)

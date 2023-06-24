@@ -1,11 +1,18 @@
-package com.denisrebrof.springboottest.hideandseekgame.model
+package com.denisrebrof.springboottest.hideandseekgame.domain.core.model
 
 import com.denisrebrof.springboottest.game.domain.model.Transform
-import com.denisrebrof.springboottest.hideandseekgame.HNSRoundFinishReason
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.HNSRoundFinishReason
 
-sealed class RoundEvent {
-    data class Update(val timeLeftMs: Long, val snapshot: RoundSnapshot) : RoundEvent()
-    data class Finished(val reason: HNSRoundFinishReason, val snapshot: RoundSnapshot) : RoundEvent()
+sealed class RoundEvent(open val snapshot: RoundSnapshot) {
+    data class Update(
+        val timeLeftMs: Long,
+        override val snapshot: RoundSnapshot
+    ) : RoundEvent(snapshot)
+
+    data class Finished(
+        val reason: HNSRoundFinishReason,
+        override val snapshot: RoundSnapshot
+    ) : RoundEvent(snapshot)
 }
 
 data class RoundSnapshot(

@@ -1,7 +1,6 @@
 package com.denisrebrof.springboottest.game.domain
 
-import com.denisrebrof.springboottest.utils.subscribeOnIO
-import com.denisrebrof.springboottest.utils.subscribeWithLogError
+import com.denisrebrof.springboottest.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
@@ -10,38 +9,45 @@ import io.reactivex.rxjava3.processors.BehaviorProcessor
 
 abstract class GameBase<GAME_STATE : Enum<GAME_STATE>>(initialState: GAME_STATE) {
 
-    protected val gameLifecycle = CompositeDisposable()
+    protected val lifecycle = CompositeDisposable()
 
     private val stateProcessor = BehaviorProcessor.createDefault(initialState)
 
+    fun start() = createGameLifecycle()
+        .doOnComplete { stop() }
+        .subscribeDefault()
+        .let(lifecycle::add)
+
+    fun stop() {
+        onStop()
+        lifecycle.clear()
+    }
+
+    protected abstract fun createGameLifecycle(): Completable
     val stateFlow: Flowable<GAME_STATE> = stateProcessor
 
-    protected abstract fun createGameLoop(): Completable
+    protected open fun onStop() = Unit
 
-    fun start() = createGameLoop()
-        .doOnComplete { gameLifecycle.clear() }
-        .subscribeOnIO()
-        .subscribeWithLogError()
-        .let(gameLifecycle::add)
+    protected fun goToState(state: GAME_STATE) = stateProcessor.onNext(state)
 
     protected fun <T> Maybe<T>.thenGoToState(
         state: GAME_STATE,
         action: (T) -> Completable
     ): Completable = this
-        .doOnSuccess { stateProcessor.onNext(state) }
+        .doOnSuccess { goToState(state) }
         .flatMapCompletable(action)
 
     protected fun <T, R> Maybe<T>.thenGoToState(
         state: GAME_STATE,
         action: (T) -> Maybe<R>
     ): Maybe<R> = this
-        .doOnSuccess { stateProcessor.onNext(state) }
+        .doOnSuccess { goToState(state) }
         .flatMap(action)
 
     protected fun <T, R> Maybe<T>.thenGoToState(
         state: GAME_STATE,
         action: () -> Maybe<R>
     ): Maybe<R> = this
-        .doOnSuccess { stateProcessor.onNext(state) }
+        .doOnSuccess { goToState(state) }
         .flatMap { action() }
 }
