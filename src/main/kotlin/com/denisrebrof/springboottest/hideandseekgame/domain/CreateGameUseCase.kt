@@ -1,10 +1,14 @@
 package com.denisrebrof.springboottest.hideandseekgame.domain
 
+import com.denisrebrof.springboottest.game.domain.GameBase
 import com.denisrebrof.springboottest.game.domain.model.Transform
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameSettings
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameState
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.HNSGame
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.PlayerInput
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.Character
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.Role
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.RoundEvent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -20,7 +24,7 @@ class CreateGameUseCase @Autowired constructor() {
         sleepPlaces = mapOf()
     )
 
-    fun create(participantIds: List<Long>): HNSGame {
+    fun create(participantIds: List<Long>): GameBase<GameState, PlayerInput, RoundEvent> {
         val playerIds = participantIds.toSet()
         return HNSGame(playerIds, defaultSettings)
     }

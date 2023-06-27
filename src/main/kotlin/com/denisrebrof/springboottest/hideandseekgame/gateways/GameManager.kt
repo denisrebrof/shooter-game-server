@@ -1,6 +1,10 @@
-package com.denisrebrof.springboottest.hideandseekgame.domain
+package com.denisrebrof.springboottest.hideandseekgame.gateways
 
-import com.denisrebrof.springboottest.hideandseekgame.domain.core.HNSGame
+import com.denisrebrof.springboottest.game.domain.GameBase
+import com.denisrebrof.springboottest.hideandseekgame.domain.CreateGameUseCase
+import com.denisrebrof.springboottest.hideandseekgame.domain.NotifyGameEventUseCase
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameState
+import com.denisrebrof.springboottest.hideandseekgame.domain.core.PlayerInput
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.RoundEvent
 import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.matches.domain.model.Match
@@ -21,7 +25,7 @@ class GameManager @Autowired constructor(
     private val notifyGameEventUseCase: NotifyGameEventUseCase
 ) : DisposableService() {
 
-    private val matchIdToGameMap = mutableMapOf<String, HNSGame>()
+    private val matchIdToGameMap = mutableMapOf<String, GameBase<GameState, PlayerInput, RoundEvent>>()
 
     private val clearFinishedGameDelayMs: Long = 1000L
 
@@ -43,13 +47,13 @@ class GameManager @Autowired constructor(
         matchIdToGameMap.remove(matchId)?.stop()
     }
 
-    private fun HNSGame.handleEvents(matchId: String): Boolean {
-        val finishHandler = getRoundEvents()
+    private fun GameBase<GameState, PlayerInput, RoundEvent>.handleEvents(matchId: String): Boolean {
+        val finishHandler = getEvents()
             .ofType(RoundEvent.Finished::class.java)
             .firstElement()
             .ignoreElement()
 
-        val roundEventsHandler = getRoundEvents()
+        val roundEventsHandler = getEvents()
             .doOnNext { roundEvent -> notifyGameEventUseCase.notify(roundEvent, matchId) }
             .ignoreElements()
 
@@ -63,12 +67,14 @@ class GameManager @Autowired constructor(
             stateEventsHandler
         )
             .delay(clearFinishedGameDelayMs, TimeUnit.MILLISECONDS)
-            .doOnComplete { clearGame(matchId) }
+            .doOnComplete { matchRepository.remove(matchId) }
             .subscribeDefault()
             .let(handler::add)
     }
 
-    private fun HNSGame.setupEventsHandler(matchId: String): HNSGame {
+    private fun GameBase<GameState, PlayerInput, RoundEvent>.setupEventsHandler(
+        matchId: String
+    ): GameBase<GameState, PlayerInput, RoundEvent> {
         handleEvents(matchId)
         return this
     }
@@ -76,5 +82,10 @@ class GameManager @Autowired constructor(
     private fun addGame(match: Match) = createGameUseCase
         .create(match.participantIds)
         .setupEventsHandler(match.id)
+        .also(GameBase<GameState, PlayerInput, RoundEvent>::start)
         .let { matchIdToGameMap[match.id] = it }
+
+    fun submitInput(matchId: String, input: PlayerInput) = matchIdToGameMap[matchId]?.submitInput(input) ?: Unit
+
+    fun removePlayer(matchId: String, playerId: Long) = matchIdToGameMap[matchId]?.removePlayer(playerId) ?: Unit
 }

@@ -5,24 +5,21 @@ import com.denisrebrof.springboottest.game.domain.model.Transform
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.Role
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.RoundEvent
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.SleepPlace
-import com.denisrebrof.springboottest.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
-import io.reactivex.rxjava3.processors.PublishProcessor
+import io.reactivex.rxjava3.processors.BehaviorProcessor
 import java.util.concurrent.TimeUnit
 
 class HNSGame(
     userIds: Set<Long>,
     private val settings: GameSettings,
-) : GameBase<GameState>(GameState.Pending) {
+) : GameBase<GameState, PlayerInput, RoundEvent>(userIds, GameState.Pending) {
 
-    private val players = userIds.toMutableSet()
+    private val roundProcessor = BehaviorProcessor.create<HNSRound>()
 
-    private val inputProcessor = PublishProcessor.create<PlayerInput>()
-    private val roundEventsProcessor = PublishProcessor.create<RoundEvent>()
-    private val removedPlayersProcessor = PublishProcessor.create<Long>()
-    private val stopEventProcessor = PublishProcessor.create<Unit>()
+    private val round: HNSRound?
+        get() = roundProcessor.value
 
     override fun createGameLifecycle(): Completable = Maybe
         .timer(settings.pendingDurationMs, TimeUnit.MILLISECONDS)
@@ -31,15 +28,13 @@ class HNSGame(
         .thenGoToState(GameState.Searching, ::setUpSearching)
         .thenGoToState(GameState.Finished, ::setUpFinish)
 
-    override fun onStop() = stopEventProcessor.onNext(Unit)
+    override fun onStop() = round?.stop() ?: Unit
 
-    fun submitInput(input: PlayerInput) = inputProcessor.onNext(input)
+    override fun submitInput(input: PlayerInput) = round?.sendInput(input) ?: Unit
 
-    fun getRoundEvents(): Flowable<RoundEvent> = roundEventsProcessor
+    override fun onRemovePlayer(userId: Long) = round?.removePlayer(userId) ?: Unit
 
-    fun removePlayer(userId: Long) = userId
-        .also(players::remove)
-        .let(removedPlayersProcessor::onNext)
+    override fun getEvents(): Flowable<RoundEvent> = roundProcessor.switchMap(HNSRound::events)
 
     private fun setUpRoles() = Maybe
         .just(assignRoles())
@@ -47,17 +42,8 @@ class HNSGame(
 
     private fun setUpHiding(playerRoles: Map<Long, Role>): Maybe<HNSRound> {
         val round = startRound(playerRoles)
-
-        val goToSearchingTimer = Maybe
-            .timer(settings.hidingDurationMs, TimeUnit.MILLISECONDS)
-            .map { GameState.Searching }
-
-        val finishedHandler = round
-            .waitUntilFinished()
-            .map { GameState.Finished }
-
         return Maybe
-
+            .timer(settings.hidingDurationMs, TimeUnit.MILLISECONDS)
             .map { round }
     }
 
@@ -86,50 +72,12 @@ class HNSGame(
         sleepPlaces = settings.sleepPlaces,
         settings = settings.roundSettings,
         durationMs = settings.gameDurationMs,
-    )
-        .also(::setupInput)
-        .also(::setupStateOutput)
-        .also(::setupPlayersRemove)
-        .also(::setupStop)
-        .also(HNSRound::start)
+    ).also(roundProcessor::onNext).also(HNSRound::start)
 
-    private fun HNSRound.sendInput(
-        input: PlayerInput
-    ) = when (input) {
+    private fun HNSRound.sendInput(input: PlayerInput) = when (input) {
         is PlayerInput.Catch -> tryCatch(input.targetId, input.playerId)
         is PlayerInput.Movement -> tryMove(input.playerId, input.pos)
         is PlayerInput.Lay -> tryLay(input.playerId, input.playerId, input.placeId)
-    }
-
-    private fun HNSRound.waitUntilFinished() = events
-        .ofType(RoundEvent.Finished::class.java)
-        .firstElement()
-
-    private fun setupStateOutput(round: HNSRound) = round
-        .events
-        .subscribeDefault(roundEventsProcessor::onNext)
-        .let(lifecycle::add)
-
-    private fun setupPlayersRemove(round: HNSRound) = removedPlayersProcessor
-        .subscribeDefault(round::removePlayer)
-        .let(lifecycle::add)
-
-    private fun setupStop(round: HNSRound) = stopEventProcessor
-        .subscribeDefault { round.stop() }
-        .let(lifecycle::add)
-
-    private fun setupInput(round: HNSRound) {
-        val inputHandler = inputProcessor
-            .doOnNext { input -> round.sendInput(input) }
-            .ignoreElements()
-        round
-            .events
-            .ofType(RoundEvent.Finished::class.java)
-            .firstElement()
-            .ignoreElement()
-            .ambWith(inputHandler)
-            .subscribeDefault()
-            .let(lifecycle::add)
     }
 }
 

@@ -27,7 +27,7 @@ class HNSGameTests {
     fun testGameLoopPassesCorrectly() {
         val game = HNSGame(defaultUsers, defaultSettings)
         game.stateFlow.subscribe(::println)
-        game.getRoundEvents().subscribe { println("round event: $it") }
+        game.getEvents().subscribe { println("round event: $it") }
         game.start()
         game.stateFlow.filter(GameState.Finished::equals).blockingFirst()
         assert(true)
@@ -37,7 +37,7 @@ class HNSGameTests {
     fun testRoundEvents() {
         val game = HNSGame(defaultUsers, defaultSettings)
         game.stateFlow.subscribe { println("Game State: $it") }
-        game.getRoundEvents().subscribe { println("round event: $it") }
+        game.getEvents().subscribe { println("round event: $it") }
         game.start()
         game.stateFlow.filter(GameState.Finished::equals).blockingFirst()
         assert(true)
@@ -47,7 +47,7 @@ class HNSGameTests {
     fun testCatchingWorks() {
         val game = HNSGame(defaultUsers, defaultSettings)
         game.stateFlow.subscribe { println("Game State: $it") }
-        game.getRoundEvents().subscribe { println("round event: $it") }
+        game.getEvents().subscribe { println("Round event: $it") }
         game.start()
         val firstEventAfterCatched = game
             .stateFlow
@@ -55,7 +55,7 @@ class HNSGameTests {
             .delay(100L, TimeUnit.MILLISECONDS)
             .firstElement()
             .doOnSuccess { game.submitInput(PlayerInput.Catch(100, 200)) }
-            .flatMap { game.getRoundEvents().firstElement() }
+            .flatMap { game.getEvents().firstElement() }
             .blockingGet()
 
         val nextUpdate = firstEventAfterCatched as? RoundEvent.Update

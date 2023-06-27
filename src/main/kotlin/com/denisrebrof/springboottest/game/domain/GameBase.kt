@@ -7,11 +7,23 @@ import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.processors.BehaviorProcessor
 
-abstract class GameBase<GAME_STATE : Enum<GAME_STATE>>(initialState: GAME_STATE) {
+abstract class GameBase<GAME_STATE : Enum<GAME_STATE>, INPUT, GAME_EVENT : Any>(
+    userIds: Set<Long>,
+    initialState: GAME_STATE,
+) {
 
-    protected val lifecycle = CompositeDisposable()
+    private val lifecycle = CompositeDisposable()
+
+    private val mPlayers = userIds.toMutableSet()
+    protected val players: Set<Long>
+        get() = mPlayers
 
     private val stateProcessor = BehaviorProcessor.createDefault(initialState)
+
+    val stateFlow: Flowable<GAME_STATE> = stateProcessor
+
+    abstract fun submitInput(input: INPUT)
+    abstract fun getEvents(): Flowable<GAME_EVENT>
 
     fun start() = createGameLifecycle()
         .doOnComplete { stop() }
@@ -23,31 +35,34 @@ abstract class GameBase<GAME_STATE : Enum<GAME_STATE>>(initialState: GAME_STATE)
         lifecycle.clear()
     }
 
+    fun removePlayer(userId: Long) {
+        mPlayers.remove(userId)
+        onRemovePlayer(userId)
+    }
+
     protected abstract fun createGameLifecycle(): Completable
-    val stateFlow: Flowable<GAME_STATE> = stateProcessor
 
     protected open fun onStop() = Unit
-
-    protected fun goToState(state: GAME_STATE) = stateProcessor.onNext(state)
+    protected open fun onRemovePlayer(userId: Long) = Unit
 
     protected fun <T> Maybe<T>.thenGoToState(
         state: GAME_STATE,
         action: (T) -> Completable
     ): Completable = this
-        .doOnSuccess { goToState(state) }
+        .doOnSuccess { stateProcessor.onNext(state) }
         .flatMapCompletable(action)
 
     protected fun <T, R> Maybe<T>.thenGoToState(
         state: GAME_STATE,
         action: (T) -> Maybe<R>
     ): Maybe<R> = this
-        .doOnSuccess { goToState(state) }
+        .doOnSuccess { stateProcessor.onNext(state) }
         .flatMap(action)
 
     protected fun <T, R> Maybe<T>.thenGoToState(
         state: GAME_STATE,
         action: () -> Maybe<R>
     ): Maybe<R> = this
-        .doOnSuccess { goToState(state) }
+        .doOnSuccess { stateProcessor.onNext(state) }
         .flatMap { action() }
 }
