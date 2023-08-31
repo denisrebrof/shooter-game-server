@@ -1,7 +1,6 @@
 package com.denisrebrof.springboottest.hideandseekgame.domain
 
 import com.denisrebrof.springboottest.game.domain.GameBase
-import com.denisrebrof.springboottest.game.domain.model.Transform
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameSettings
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameState
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.HNSGame
@@ -21,7 +20,8 @@ class CreateGameUseCase @Autowired constructor() {
             Role(Character.Hider1, defaultTransform, false),
             Role(Character.Seeker1, defaultTransform.copy(x = 0.5f), true)
         ),
-        sleepPlaces = mapOf()
+        sleepPlaces = mapOf(),
+        searchingDurationMs = 1000 * 60 * 15
     )
 
     fun create(participantIds: List<Long>): GameBase<GameState, PlayerInput, RoundEvent> {

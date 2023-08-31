@@ -4,7 +4,7 @@ plugins {
     id("org.springframework.boot") version "2.7.6"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("plugin.serialization") version "1.7.20"
-    kotlin("kapt") version "1.7.21"
+    kotlin("kapt") version "1.8.21"
     kotlin("jvm") version "1.7.22"
     kotlin("plugin.spring") version "1.7.22"
     kotlin("plugin.jpa") version "1.7.22"
@@ -35,7 +35,7 @@ allprojects {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
+    implementation(libs.kotlinReflect)
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
@@ -52,13 +52,15 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     runtimeOnly("com.h2database:h2")
 
-    implementation("org.projectlombok:lombok:1.18.24")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-
-    implementation("io.reactivex.rxjava3:rxjava:3.1.5")
+    implementation(libs.lombok)
+    implementation(libs.kotlinxSerialization)
+    implementation(libs.rxjava3)
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    implementation(project(":utils"))
+    implementation(project(":games"))
+    implementation(project(":gameentities"))
 }
 
 //Disable plain jar

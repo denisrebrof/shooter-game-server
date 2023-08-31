@@ -36,7 +36,7 @@ class LogInUseCase @Autowired constructor(
             .getOrCreate(identity)
             ?: return LoginResult.Failed
         sessionMappingRepository.addMapping(user.id, sessionId)
-        return LoginResult.Success("")
+        return LoginResult.Success("", user.id)
     }
 
     private fun basicLogin(username: String, password: String): LoginResult {
@@ -52,7 +52,7 @@ class LogInUseCase @Autowired constructor(
         if (!correctPassword)
             return LoginResult.Failed
 
-        return LoginResult.Success("")
+        return LoginResult.Success("", user.id)
     }
 
     private fun tokenLogin(token: String): LoginResult {

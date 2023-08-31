@@ -1,5 +1,3 @@
-package com.denisrebrof.springboottest.utils
-
 import io.reactivex.rxjava3.disposables.Disposable
 import org.springframework.beans.factory.DisposableBean
 

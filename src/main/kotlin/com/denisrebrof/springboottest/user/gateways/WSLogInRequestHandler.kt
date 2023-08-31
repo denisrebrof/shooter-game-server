@@ -44,13 +44,14 @@ class WSLogInRequestHandler @Autowired constructor(
 
     private fun createResponse(result: LoginResult) = when (result) {
         LoginResult.Failed -> LoginResponse(false)
-        is LoginResult.Success -> LoginResponse(true, result.token)
+        is LoginResult.Success -> LoginResponse(true, result.token, result.userId)
     }
 
     @Serializable
     data class LoginResponse(
         val authSuccessful: Boolean,
-        val token: String = ""
+        val token: String = "",
+        val userId: Long = -1L
     )
 
     @Serializable

@@ -2,6 +2,7 @@ package com.denisrebrof.springboottest.hideandseekgame.domain.core.model
 
 import com.denisrebrof.springboottest.game.domain.model.Transform
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.HNSRoundFinishReason
+import kotlinx.serialization.Serializable
 
 sealed class RoundEvent(open val snapshot: RoundSnapshot) {
     data class Update(
@@ -15,11 +16,13 @@ sealed class RoundEvent(open val snapshot: RoundSnapshot) {
     ) : RoundEvent(snapshot)
 }
 
+@Serializable
 data class RoundSnapshot(
     val seekers: Map<Long, SeekerSnapshotItem>,
     val hiders: Map<Long, HiderSnapshotItem>
 )
 
+@Serializable
 data class SeekerSnapshotItem(
     val transform: Transform,
     val character: Character,
@@ -28,6 +31,7 @@ data class SeekerSnapshotItem(
     val catchedHiderId: Long?,
 )
 
+@Serializable
 data class HiderSnapshotItem(
     val transform: Transform,
     val character: Character,

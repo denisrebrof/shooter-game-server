@@ -1,11 +1,11 @@
 package com.denisrebrof.springboottest.game.domain
 
-import com.denisrebrof.springboottest.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.processors.BehaviorProcessor
+import subscribeDefault
 
 abstract class GameBase<GAME_STATE : Enum<GAME_STATE>, INPUT, GAME_EVENT : Any>(
     userIds: Set<Long>,
@@ -52,14 +52,14 @@ abstract class GameBase<GAME_STATE : Enum<GAME_STATE>, INPUT, GAME_EVENT : Any>(
         .doOnSuccess { stateProcessor.onNext(state) }
         .flatMapCompletable(action)
 
-    protected fun <T, R> Maybe<T>.thenGoToState(
+    protected fun <T, R : Any> Maybe<T>.thenGoToState(
         state: GAME_STATE,
         action: (T) -> Maybe<R>
     ): Maybe<R> = this
         .doOnSuccess { stateProcessor.onNext(state) }
         .flatMap(action)
 
-    protected fun <T, R> Maybe<T>.thenGoToState(
+    protected fun <T, R : Any> Maybe<T>.thenGoToState(
         state: GAME_STATE,
         action: () -> Maybe<R>
     ): Maybe<R> = this

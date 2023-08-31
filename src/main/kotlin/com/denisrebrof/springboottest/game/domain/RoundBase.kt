@@ -1,9 +1,9 @@
 package com.denisrebrof.springboottest.game.domain
 
-import com.denisrebrof.springboottest.utils.subscribeOnIO
-import com.denisrebrof.springboottest.utils.subscribeWithLogError
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import subscribeOnIO
+import subscribeWithLogError
 import java.util.concurrent.TimeUnit
 
 abstract class RoundBase(

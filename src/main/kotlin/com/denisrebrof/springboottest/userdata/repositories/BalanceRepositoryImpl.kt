@@ -3,6 +3,7 @@ package com.denisrebrof.springboottest.userdata.repositories
 import com.denisrebrof.springboottest.balance.domain.repositories.IBalanceRepository
 import com.denisrebrof.springboottest.userdata.model.UserBalance
 import com.denisrebrof.springboottest.userdata.repositories.internal.UserBalanceRepository
+import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

@@ -26,7 +26,9 @@ class WSNotificationService @Autowired constructor(
             .append(delimiter)
             .append(notificationContent)
             .toString()
-        TextMessage(responseText).let(responseSession::sendMessage)
+        synchronized(responseSession) {
+            TextMessage(responseText).let(responseSession::sendMessage)
+        }
     }
 
     private fun getSessionNullable(sessionId: String) = sessionRepository
