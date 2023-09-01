@@ -18,6 +18,7 @@ dependencyResolutionManagement {
             val arrowVersion = "1.2.0"
             library("arrowCore", "io.arrow-kt:arrow-core:$arrowVersion")
             library("arrowOptics", "io.arrow-kt:arrow-optics:$arrowVersion")
+            library("arrowOpticsReflect", "io.arrow-kt:arrow-optics-reflect:$arrowVersion")
             library("arrowOpticsPlugin", "io.arrow-kt:arrow-optics-ksp-plugin:$arrowVersion")
 
             //Tests

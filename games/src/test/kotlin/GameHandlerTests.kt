@@ -3,6 +3,7 @@ import arrow.optics.dsl.index
 import arrow.optics.optics
 import arrow.optics.typeclasses.Index
 import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.disposables.Disposable
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -43,9 +44,22 @@ class GameHandlerTests {
     private data class SampleGameAddScoreIntent(val playerId: Long)
 
     private class SampleGame(
-        initialState: SampleGameState
-    ) : MVIGameHandler<SampleGameState, SampleGameAddScoreIntent, SampleGameAction>(initialState) {
-        override fun onIntentReceived(intent: SampleGameAddScoreIntent, state: SampleGameState) {
+        playerIds: Set<Long>
+    ) : MVIGameHandler<SampleGameState, SampleGameAddScoreIntent, SampleGameAction>(SampleGameState.Preparing(playerIds)) {
+
+        override fun onCreateLifecycle(): Disposable = Maybe
+            .timer(1000L, TimeUnit.MILLISECONDS)
+            .map { state }
+            .ofType(SampleGameState.Preparing::class.java)
+            .map {
+                SampleGameState.Playing(
+                    it.playerIds.associateWith { 0 },
+                    SampleGameState.TestDataOne(SampleGameState.TestDataTwo("test"))
+                )
+            }
+            .subscribeDefault(::setState)
+
+        override fun onIntentReceived(intent: SampleGameAddScoreIntent) {
             val playingState = state as? SampleGameState.Playing ?: return
             val currentScore = playingState.playerToScore[intent.playerId] ?: return
             val newScore = currentScore + 1
@@ -56,8 +70,8 @@ class GameHandlerTests {
 
             send(SampleGameAction.Fireworks)
             return playingState.copyAndSet {
-                SampleGameState.Playing.test transform { "$$it$" }
-                SampleGameState.Playing.playerToScore.index(Index.map(), intent.playerId) transform { newScore }
+//                SampleGameState.Playing.test.data.data transform { "$$it$" }
+//                SampleGameState.Playing.playerToScore.index(Index.map(), intent.playerId) transform { newScore }
             }
         }
     }
@@ -65,25 +79,22 @@ class GameHandlerTests {
     @Test
     fun testSampleGame() {
         val playerIds = setOf(0L, 1L)
-        val startState = SampleGameState.Preparing(playerIds)
-        val gameHandler = SampleGame(startState)
+        val gameHandler = SampleGame(playerIds)
 
-        val preparingStateSubscription = Disposable.empty()
-        gameHandler.addToStateType(preparingStateSubscription, SampleGameState.Preparing::class)
-        assert(!preparingStateSubscription.isDisposed)
-
-        val scores = playerIds.associateWith { 0 }
-//        SampleGameState.Playing(scores, "def").let(gameHandler::setState)
-        assert(preparingStateSubscription.isDisposed)
+        gameHandler
+            .stateFlow
+            .ofType(SampleGameState.Playing::class.java)
+            .firstElement()
+            .blockingSubscribe()
 
         val playingStateSubscription = Flowable
             .interval(100L, TimeUnit.MILLISECONDS)
             .map { SampleGameAddScoreIntent(0L) }
             .subscribe(gameHandler::submit)
-        gameHandler.addToStateType(playingStateSubscription, SampleGameState.Playing::class)
+            .also(gameHandler::add)
 
         val finishedState = gameHandler
-            .state
+            .stateFlow
             .ofType(SampleGameState.Finished::class.java)
             .firstElement()
             .blockingGet()!!

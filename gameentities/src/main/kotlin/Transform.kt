@@ -1,13 +1,13 @@
-import kotlinx.serialization.Serializable
+package gameentities
 
-data class Test3(val test: String)
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class Transform(
-    var x: Float,
-    var y: Float,
-    var z: Float,
-    var r: Float,
+    val x: Float,
+    val y: Float,
+    val z: Float,
+    val r: Float,
 ) {
     fun isClose(other: Transform, distance: Float): Boolean {
         val squaredDist = other.getSquaredDistanceTo(this)
@@ -20,6 +20,4 @@ data class Transform(
         val distZ = other.z - z
         return distX * distX + distY * distY + distZ * distZ
     }
-
-    companion object
 }

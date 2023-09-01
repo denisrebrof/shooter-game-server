@@ -1,5 +1,6 @@
 package com.denisrebrof.springboottest.hideandseekgame.domain
 
+import Transform
 import com.denisrebrof.springboottest.game.domain.GameBase
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameSettings
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.GameState

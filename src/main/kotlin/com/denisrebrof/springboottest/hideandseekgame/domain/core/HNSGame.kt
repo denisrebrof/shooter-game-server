@@ -1,7 +1,7 @@
 package com.denisrebrof.springboottest.hideandseekgame.domain.core
 
+import Transform
 import com.denisrebrof.springboottest.game.domain.GameBase
-import com.denisrebrof.springboottest.game.domain.model.Transform
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.Role
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.RoundEvent
 import com.denisrebrof.springboottest.hideandseekgame.domain.core.model.SleepPlace

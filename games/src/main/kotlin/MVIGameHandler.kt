@@ -1,41 +1,57 @@
 import arrow.optics.Copy
 import arrow.optics.copy
 import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.disposables.DisposableContainer
 import io.reactivex.rxjava3.processors.BehaviorProcessor
 import io.reactivex.rxjava3.processors.PublishProcessor
 
 open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private constructor(
-    protected val lifecycle: GameLifecycle<STATE>,
     initialState: STATE,
-) : IGameLifecycle<STATE> by lifecycle, Disposable by lifecycle {
+    private val composite: CompositeDisposable
+) : Disposable by composite, DisposableContainer by composite {
 
-    constructor(initialState: STATE) : this(
-        lifecycle = GameLifecycle<STATE>(initialState),
-        initialState = initialState,
-    )
+    constructor(initialState: STATE) : this(initialState, CompositeDisposable())
 
     private val stateProcessor = BehaviorProcessor.createDefault(initialState)
     private val actionProcessor = PublishProcessor.create<ACTION>()
 
-    private val stateValue: STATE
-        get() = stateProcessor.value!!
+    private var currentState = initialState
 
-    val state: Flowable<STATE>
+    val state: STATE
+        get() = currentState
+
+    val stateFlow: Flowable<STATE>
         get() = stateProcessor
 
     val actions: Flowable<ACTION>
         get() = actionProcessor
 
-    fun submit(intent: INTENT) = onIntentReceived(intent, stateValue)
+    fun submit(intent: INTENT) = onIntentReceived(intent)
 
-    open fun onIntentReceived(intent: INTENT, state: STATE) = Unit
+    protected open fun onCreateLifecycle(): Disposable = Disposable.disposed()
 
-    override fun setState(state: STATE) = state
-        .also(lifecycle::setState)
-        .let(stateProcessor::onNext)
+    protected open fun onIntentReceived(intent: INTENT) = Unit
 
-    protected fun send(action: ACTION) = actionProcessor.onNext(action)
+    protected fun setState(state: STATE) {
+        if (isDisposed)
+            return
 
-    protected fun <INNER: STATE> INNER.copyAndSet(copy: Copy<INNER>.() -> Unit) = copy(copy).let(::setState)
+        assignState(state)
+    }
+
+    private fun assignState(state: STATE) {
+        currentState = state
+        stateProcessor.onNext(state)
+    }
+
+    protected fun send(action: ACTION) {
+        if (isDisposed)
+            return
+
+        actionProcessor.onNext(action)
+    }
+
+    protected fun STATE.copyAndSet(copy: Copy<STATE>.() -> Unit) = copy(copy).let(::setState)
 }
