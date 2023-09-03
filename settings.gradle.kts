@@ -14,6 +14,11 @@ dependencyResolutionManagement {
             library("rxjava3", "io.reactivex.rxjava3:rxjava:3.1.5")
             library("lombok", "org.projectlombok:lombok:1.18.24")
 
+            //Spring
+            val springLibsVersion = "5.3.24"
+            library("springBeans", "org.springframework:spring-beans:$springLibsVersion")
+            library("springContext", "org.springframework:spring-context:$springLibsVersion")
+
             //Arrow
             val arrowVersion = "1.2.0"
             library("arrowCore", "io.arrow-kt:arrow-core:$arrowVersion")

@@ -20,4 +20,8 @@ data class Transform(
         val distZ = other.z - z
         return distX * distX + distY * distY + distZ * distZ
     }
+
+    companion object {
+        val Zero = Transform(0f,0f,0f,0f)
+    }
 }

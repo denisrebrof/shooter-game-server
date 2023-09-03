@@ -40,3 +40,10 @@ object Pending : ShooterDynamicState
     val finishedPlayers: Map<Long, ShooterPlayerData>,
     val winnerTeam: PlayerTeam
 ): ShooterGameState { companion object }
+
+val ShooterGameState.playerIds: Set<Long>
+    get() = when(this) {
+        is Finished -> finishedPlayers.keys
+        is PlayingState -> players.keys
+        is Preparing -> pendingPlayers.keys
+    }

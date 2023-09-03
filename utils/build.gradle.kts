@@ -13,8 +13,7 @@ repositories {
 
 dependencies {
     implementation(libs.rxjava3)
-
-    implementation("org.springframework:spring-beans:5.3.24")
+    implementation(libs.springBeans)
 
     testImplementation(platform(libs.junit))
     testImplementation(libs.junitJupiter)

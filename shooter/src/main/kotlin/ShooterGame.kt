@@ -155,7 +155,7 @@ class ShooterGame private constructor(
                     playerId to ShooterPlayerData(team)
                 }
                 .toMap()
-            return ShooterGame(settings, players).also(ShooterGame::start)
+            return ShooterGame(settings, players)
 
         }
     }

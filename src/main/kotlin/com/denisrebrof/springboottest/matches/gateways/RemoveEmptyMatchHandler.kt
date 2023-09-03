@@ -1,5 +1,6 @@
 package com.denisrebrof.springboottest.matches.gateways
 
+import DisposableService
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository
 import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.matches.domain.model.Match
@@ -7,13 +8,12 @@ import com.denisrebrof.springboottest.matches.domain.model.MatchUpdate
 import com.denisrebrof.springboottest.matches.domain.model.MatchUpdate.UpdateType
 import com.denisrebrof.springboottest.user.data.WSUserSessionRepository
 import com.denisrebrof.springboottest.user.domain.repositories.IWSUserSessionRepository.UserSessionState
-import com.denisrebrof.springboottest.utils.DisposableService
-import com.denisrebrof.springboottest.utils.filterIsTrue
-import com.denisrebrof.springboottest.utils.subscribeDefault
+import filterIsTrue
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import subscribeDefault
 import kotlin.reflect.cast
 
 @Service

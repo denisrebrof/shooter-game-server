@@ -13,7 +13,9 @@ class ShooterGameTest {
     @Test
     fun testGame() {
         val settings = ShooterGameSettings(prepareDelay = 1000L, gameDuration = 1000L)
-        val game = ShooterGame.create(playerIds, settings)
+        val game = ShooterGame
+            .create(playerIds, settings)
+            .also(ShooterGame::start)
         game
             .stateFlow
             .ofType(PlayingState::class.java)
