@@ -1,13 +1,13 @@
 package com.denisrebrof.springboottest.matches.gateways
 
+import DisposableService
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository
 import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.matches.domain.model.Match
-import com.denisrebrof.springboottest.utils.DisposableService
-import com.denisrebrof.springboottest.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Flowable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import subscribeDefault
 import java.util.*
 import java.util.concurrent.TimeUnit
 

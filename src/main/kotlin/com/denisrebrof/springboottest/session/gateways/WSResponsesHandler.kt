@@ -1,11 +1,11 @@
 package com.denisrebrof.springboottest.session.gateways
 
+import DisposableService
 import com.denisrebrof.springboottest.commands.domain.NotificationsRepository
 import com.denisrebrof.springboottest.commands.gateways.WSNotificationService
-import com.denisrebrof.springboottest.utils.DisposableService
-import com.denisrebrof.springboottest.utils.subscribeDefault
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import subscribeDefault
 
 @Service
 class WSResponsesHandler @Autowired constructor(

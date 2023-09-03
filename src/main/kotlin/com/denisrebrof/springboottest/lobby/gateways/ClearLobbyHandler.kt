@@ -1,12 +1,12 @@
 package com.denisrebrof.springboottest.lobby.gateways
 
+import DisposableService
 import com.denisrebrof.springboottest.lobby.domain.LobbyRepository
 import com.denisrebrof.springboottest.user.domain.repositories.IWSUserSessionEventsRepository
 import com.denisrebrof.springboottest.user.domain.repositories.IWSUserSessionEventsRepository.UserSessionEventType
-import com.denisrebrof.springboottest.utils.DisposableService
-import com.denisrebrof.springboottest.utils.subscribeDefault
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import subscribeDefault
 
 @Service
 class ClearLobbyHandler @Autowired constructor(
