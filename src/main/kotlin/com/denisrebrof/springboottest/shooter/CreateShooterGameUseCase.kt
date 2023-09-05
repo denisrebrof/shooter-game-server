@@ -4,7 +4,6 @@ import ShooterGame
 import ShooterGameSettings
 import gameentities.Transform
 import io.reactivex.rxjava3.core.Flowable
-import model.ShooterGameActions
 import model.playerIds
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -22,8 +21,8 @@ class CreateShooterGameUseCase @Autowired constructor(
         redTeamSpawnPos = Transform(0f, 0f, 0f, 0f),
         blueTeamSpawnPos = Transform(10f, 0f, 0f, 0f),
         respawnDelay = 3000L,
-        prepareDelay = 10000L,
-        gameDuration = 100000L,
+        prepareDelay = 2500L,
+        gameDuration = 1000000L,
         completeDelay = 10000L
     )
 
@@ -43,10 +42,7 @@ class CreateShooterGameUseCase @Autowired constructor(
     private fun createActionsHandler(game: ShooterGame) = game
         .actions
         .subscribeDefault { action ->
-            val receivers = when (action) {
-                is ShooterGameActions.CanSpawn -> listOf(action.playerId)
-                else -> game.state.playerIds.toList()
-            }
+            val receivers = game.state.playerIds.toList()
             notificationsUseCase.notifyAction(action, receivers)
         }.let(game::add)
 }

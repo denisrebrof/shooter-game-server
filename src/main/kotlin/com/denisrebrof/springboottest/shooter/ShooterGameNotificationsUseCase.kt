@@ -32,10 +32,8 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
 
     fun notifyAction(action: ShooterGameActions, playerIds: List<Long>) {
         val command = when (action) {
-            is ShooterGameActions.CanSpawn -> WSCommand.ActionCanSpawn
             is ShooterGameActions.Hit -> WSCommand.ActionHit
             is ShooterGameActions.Shoot -> WSCommand.ActionShoot
-            is ShooterGameActions.Spawned -> WSCommand.ActionSpawned
             ShooterGameActions.LifecycleCompleted -> return
         }
 

@@ -1,8 +1,6 @@
 import arrow.optics.dsl.index
 import arrow.optics.typeclasses.Index
-import gameentities.Transform
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.disposables.Disposable
 import model.*
 import model.PlayerTeam.Blue
 import model.PlayerTeam.Red
@@ -10,15 +8,6 @@ import java.util.concurrent.TimeUnit
 import model.ShooterGameActions as Action
 import model.ShooterGameIntents as Intent
 import model.ShooterGameState as State
-
-data class ShooterGameSettings(
-    val redTeamSpawnPos: Transform = Transform(0f, 0f, 0f, 0f),
-    val blueTeamSpawnPos: Transform = Transform(0f, 0f, 0f, 0f),
-    val respawnDelay: Long = 3000L,
-    val prepareDelay: Long = 10000L,
-    val gameDuration: Long = 100000L,
-    val completeDelay: Long = 10000L,
-)
 
 class ShooterGame private constructor(
     private val settings: ShooterGameSettings,
@@ -88,12 +77,11 @@ class ShooterGame private constructor(
             if (dynamicState !is Killed)
                 return@transform dynamicState
 
-            val pos = getSpawn(playerTeam)
             Playing(
-                100,
-                pos,
-                0f,
-                0L
+                hp = 100,
+                transform = getSpawn(playerTeam),
+                verticalLookAngle = 0f,
+                selectedWeaponId = 0L
             )
         }
     }

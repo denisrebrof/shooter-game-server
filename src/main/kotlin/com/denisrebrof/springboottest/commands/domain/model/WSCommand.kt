@@ -9,8 +9,6 @@ enum class WSCommand(val id: Long) {
     BalanceState(5L),
 
     GameState(6L),
-    ActionCanSpawn(7L),
-    ActionSpawned(8L),
     ActionShoot(9L),
     ActionHit(10L),
 
