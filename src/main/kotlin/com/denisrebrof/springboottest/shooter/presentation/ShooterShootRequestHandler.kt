@@ -33,14 +33,14 @@ class ShooterShootRequestHandler @Autowired constructor(
         val weaponId: Long,
         val damage: Int,
         val hitPos: Transform,
-        val receiverId: Long?
+        val receiverId: Long
     ) {
         fun toIntent(playerId: Long) = ShooterGameIntents.Shoot(
             shooterId = playerId,
             weaponId = weaponId,
             damage = damage,
             hitPos = hitPos,
-            receiverId = receiverId,
+            receiverId = if (receiverId > 0) receiverId else null,
         )
     }
 }

@@ -105,7 +105,7 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
                     teamId = state.data.team.id,
                     kills = state.data.kills,
                     death = state.data.death,
-                    alive = state.dynamicState is Killed,
+                    alive = state.dynamicState is Playing,
                     hp = playingState?.hp ?: 0,
                     pos = playingState?.transform
                         ?: killedState?.killPosition
