@@ -5,7 +5,6 @@ import com.denisrebrof.springboottest.commands.domain.model.WSCommand
 import com.denisrebrof.springboottest.matches.domain.IMatchRepository
 import com.denisrebrof.springboottest.shooter.ShooterGameService
 import com.denisrebrof.springboottest.user.gateways.WSUserRequestHandler
-import gameentities.Transform
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -14,29 +13,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ShooterShootRequestHandler @Autowired constructor(
+class ShooterSelectWeaponRequestHandler @Autowired constructor(
     private val service: ShooterGameService,
     private val matchRepository: IMatchRepository
-) : WSUserRequestHandler<ShooterShootRequestHandler.IntentShootData>(WSCommand.IntentShoot.id) {
+) : WSUserRequestHandler<ShooterSelectWeaponRequestHandler.SelectWeaponRequest>(WSCommand.IntentSelectWeapon.id) {
 
-    override fun parseData(data: String): IntentShootData = Json.decodeFromString(data)
+    override fun parseData(data: String): SelectWeaponRequest = Json.decodeFromString(data)
 
-    override fun handleMessage(userId: Long, data: IntentShootData): ResponseState = with(data) {
+    override fun handleMessage(userId: Long, data: SelectWeaponRequest): ResponseState = with(data) {
         val matchId = matchRepository.getMatchIdByUserId(userId) ?: return@with ResponseState.NoResponse
-        val intent = data.toIntent(userId)
+        val intent = ShooterGameIntents.SelectWeapon(userId, data.weaponId)
         service.submitIntent(matchId, intent)
         return@with ResponseState.NoResponse
     }
 
     @Serializable
-    data class IntentShootData(
+    data class SelectWeaponRequest(
         val weaponId: Long,
-        val direction: Transform
-    ) {
-        fun toIntent(playerId: Long) = ShooterGameIntents.Shoot(
-            shooterId = playerId,
-            weaponId = weaponId,
-            direction = direction
-        )
-    }
+    )
 }

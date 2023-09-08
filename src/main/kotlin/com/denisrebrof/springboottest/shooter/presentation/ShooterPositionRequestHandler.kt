@@ -14,14 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ShooterPositionIntentHandler @Autowired constructor(
+class ShooterPositionRequestHandler @Autowired constructor(
     private val service: ShooterGameService,
     private val matchRepository: IMatchRepository
-) : WSUserRequestHandler<ShooterPositionIntentHandler.IntentSubmitPosData>(WSCommand.IntentSubmitPosition.id) {
+) : WSUserRequestHandler<ShooterPositionRequestHandler.SubmitPosRequest>(WSCommand.IntentSubmitPosition.id) {
 
-    override fun parseData(data: String): IntentSubmitPosData = Json.decodeFromString(data)
+    override fun parseData(data: String): SubmitPosRequest = Json.decodeFromString(data)
 
-    override fun handleMessage(userId: Long, data: IntentSubmitPosData): ResponseState = with(data) {
+    override fun handleMessage(userId: Long, data: SubmitPosRequest): ResponseState = with(data) {
         val matchId = matchRepository.getMatchIdByUserId(userId) ?: return@with ResponseState.NoResponse
         val intent = ShooterGameIntents.UpdatePos(userId, pos, verticalLookAngle)
         service.submitIntent(matchId, intent)
@@ -29,7 +29,7 @@ class ShooterPositionIntentHandler @Autowired constructor(
     }
 
     @Serializable
-    data class IntentSubmitPosData(
+    data class SubmitPosRequest(
         val pos: Transform,
         val verticalLookAngle: Float
     )

@@ -14,14 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ShooterShootRequestHandler @Autowired constructor(
+class ShooterHitRequestHandler @Autowired constructor(
     private val service: ShooterGameService,
     private val matchRepository: IMatchRepository
-) : WSUserRequestHandler<ShooterShootRequestHandler.IntentShootData>(WSCommand.IntentShoot.id) {
+) : WSUserRequestHandler<ShooterHitRequestHandler.HitRequest>(WSCommand.IntentHit.id) {
 
-    override fun parseData(data: String): IntentShootData = Json.decodeFromString(data)
+    override fun parseData(data: String): HitRequest = Json.decodeFromString(data)
 
-    override fun handleMessage(userId: Long, data: IntentShootData): ResponseState = with(data) {
+    override fun handleMessage(userId: Long, data: HitRequest): ResponseState = with(data) {
         val matchId = matchRepository.getMatchIdByUserId(userId) ?: return@with ResponseState.NoResponse
         val intent = data.toIntent(userId)
         service.submitIntent(matchId, intent)
@@ -29,14 +29,18 @@ class ShooterShootRequestHandler @Autowired constructor(
     }
 
     @Serializable
-    data class IntentShootData(
+    data class HitRequest(
         val weaponId: Long,
-        val direction: Transform
+        val damage: Int,
+        val hitPos: Transform,
+        val receiverId: Long
     ) {
-        fun toIntent(playerId: Long) = ShooterGameIntents.Shoot(
+        fun toIntent(playerId: Long) = ShooterGameIntents.Hit(
             shooterId = playerId,
             weaponId = weaponId,
-            direction = direction
+            hitPos = hitPos,
+            receiverId = if(receiverId >= 0) receiverId else null,
+            damage = damage
         )
     }
 }

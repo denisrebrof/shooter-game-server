@@ -4,6 +4,7 @@ import io.reactivex.rxjava3.core.Completable
 import model.*
 import model.PlayerTeam.Blue
 import model.PlayerTeam.Red
+import model.ShooterGameIntents
 import java.util.concurrent.TimeUnit
 import model.ShooterGameActions as Action
 import model.ShooterGameIntents as Intent
@@ -35,20 +36,23 @@ class ShooterGame private constructor(
         is Intent.SelectWeapon -> selectWeapon(intent)
         is Intent.Shoot -> shoot(intent)
         is Intent.UpdatePos -> updatePos(intent)
+        is ShooterGameIntents.Hit -> hit(intent)
     }
 
-    private fun selectWeapon(intent: Intent.SelectWeapon) = state.copyAndSet {
-        getPlayerPlayingStateOptional(intent.playerId).selectedWeaponId set intent.weaponId
+    private fun selectWeapon(intent: Intent.SelectWeapon) {
+        val prevState = state
+        state.copyAndSet {
+            getPlayerStateOptional(intent.playerId).selectedWeaponId set intent.weaponId
+        }
+        val postState = state
     }
 
-    private fun shoot(intent: Intent.Shoot) = state.copyAndSet {
+    private fun hit(intent: Intent.Hit) = state.copyAndSet {
         val shooter = getPlayerStateOptional(intent.shooterId)
         val shooterPlaying = shooter.dynamicState.playing
         if (shooterPlaying.isEmpty(state))
             return@copyAndSet
 
-        shooterPlaying.selectedWeaponId set intent.weaponId
-        Action.Shoot(intent.shooterId, intent.weaponId, intent.hitPos).let(::send)
         val receiverId = intent.receiverId ?: return@copyAndSet
         val receiver = getPlayerStateOptional(receiverId)
         val receiverPlaying = receiver.dynamicState.playing
@@ -70,6 +74,16 @@ class ShooterGame private constructor(
             .let(::add)
     }
 
+    private fun shoot(intent: Intent.Shoot) = state.copyAndSet {
+        val shooter = getPlayerStateOptional(intent.shooterId)
+        val shooterPlaying = shooter.dynamicState.playing
+        if (shooterPlaying.isEmpty(state))
+            return@copyAndSet
+
+        shooter.selectedWeaponId set intent.weaponId
+        Action.Shoot(intent.shooterId, intent.weaponId, intent.direction).let(::send)
+    }
+
     private fun revivePlayer(playerId: Long) = state.copyAndSet {
         val playerState = getPlayerStateOptional(playerId)
         val playerTeam = playerState.data.team.getOrNull(state) ?: return@copyAndSet
@@ -80,8 +94,7 @@ class ShooterGame private constructor(
             Playing(
                 hp = 100,
                 transform = getSpawn(playerTeam),
-                verticalLookAngle = 0f,
-                selectedWeaponId = 0L
+                verticalLookAngle = 0f
             )
         }
     }
@@ -124,10 +137,9 @@ class ShooterGame private constructor(
             val dynamicState = Playing(
                 100,
                 getSpawn(data.team),
-                0f,
-                0L
+                0f
             )
-            ShooterPlayerState(data, dynamicState)
+            ShooterPlayerState(data, 0L, dynamicState)
         }
     )
 

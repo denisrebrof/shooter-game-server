@@ -4,21 +4,28 @@ import gameentities.Transform
 
 
 sealed class ShooterGameIntents {
-    data class Shoot(
+    data class Hit(
         val shooterId: Long,
         val weaponId: Long,
         val damage: Int,
         val hitPos: Transform,
         val receiverId: Long?
-    ): ShooterGameIntents()
+    ) : ShooterGameIntents()
+
+    data class Shoot(
+        val shooterId: Long,
+        val weaponId: Long,
+        val direction: Transform
+    ) : ShooterGameIntents()
+
     data class SelectWeapon(
         val playerId: Long,
         val weaponId: Long,
-    ): ShooterGameIntents()
+    ) : ShooterGameIntents()
 
     data class UpdatePos(
         val playerId: Long,
         val pos: Transform,
         val verticalLookAngle: Float,
-    ): ShooterGameIntents()
+    ) : ShooterGameIntents()
 }

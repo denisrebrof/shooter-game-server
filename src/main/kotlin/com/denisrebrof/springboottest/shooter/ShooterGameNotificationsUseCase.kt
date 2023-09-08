@@ -31,15 +31,17 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
     )
 
     fun notifyAction(action: ShooterGameActions, playerIds: List<Long>) {
-        val command = when (action) {
-            is ShooterGameActions.Hit -> WSCommand.ActionHit
-            is ShooterGameActions.Shoot -> WSCommand.ActionShoot
+        val (command, notification) = when (action) {
+            is ShooterGameActions.Hit -> WSCommand.ActionHit to action
+                .let(Json::encodeToString)
+                .let(NotificationContent::Data)
+
+            is ShooterGameActions.Shoot -> WSCommand.ActionShoot to action
+                .let(Json::encodeToString)
+                .let(NotificationContent::Data)
+
             ShooterGameActions.LifecycleCompleted -> return
         }
-
-        val notification = action
-            .let(Json::encodeToString)
-            .let(NotificationContent::Data)
         playerIds.forEach { playerId ->
             sendUserNotificationUseCase.send(playerId, command.id, notification)
         }
@@ -111,7 +113,7 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
                         ?: killedState?.killPosition
                         ?: Transform.Zero,
                     verticalLookAngle = playingState?.verticalLookAngle ?: 0f,
-                    selectedWeaponId = 0L
+                    selectedWeaponId = state.selectedWeaponId
                 )
             }
 

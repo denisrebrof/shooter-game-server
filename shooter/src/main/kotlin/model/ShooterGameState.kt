@@ -10,6 +10,7 @@ enum class PlayerTeam(val id: Int) {
 
 @optics data class ShooterPlayerState(
     val data: ShooterPlayerData,
+    val selectedWeaponId: Long,
     val dynamicState: ShooterDynamicState = Pending
 ) { companion object }
 
@@ -19,12 +20,11 @@ object Pending : ShooterDynamicState
 @optics data class Playing(
     val hp: Int,
     val transform: Transform,
-    val verticalLookAngle: Float,
-    val selectedWeaponId: Long
+    val verticalLookAngle: Float
 ) : ShooterDynamicState { companion object }
 
 @optics data class Killed(
-    val killPosition: Transform
+    val killPosition: Transform,
 ) : ShooterDynamicState { companion object }
 
 @optics data class ShooterPlayerData(

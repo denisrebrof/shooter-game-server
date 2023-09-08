@@ -5,13 +5,12 @@ import kotlinx.serialization.Serializable
 
 
 sealed class ShooterGameActions {
-
     object LifecycleCompleted: ShooterGameActions()
     @Serializable
     data class Shoot(
         val shooterId: Long,
         val weaponId: Long,
-        val hitPos: Transform
+        val direction: Transform
     ): ShooterGameActions()
     @Serializable
     data class Hit(
