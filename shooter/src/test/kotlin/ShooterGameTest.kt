@@ -1,6 +1,5 @@
 import gameentities.Transform
 import model.Finished
-import model.Playing
 import model.PlayingState
 import model.ShooterGameIntents
 import org.junit.jupiter.api.Test
@@ -20,7 +19,7 @@ class ShooterGameTest {
             .stateFlow
             .ofType(PlayingState::class.java)
             .delay(100L, TimeUnit.MILLISECONDS)
-            .map { ShooterGameIntents.Shoot(1L, 1L, 1000, Transform(0f,0f,0f,0f), 2L) }
+            .map { ShooterGameIntents.Shoot(1L, 1L, Transform(0f, 0f, 0f, 0f)) }
             .doOnNext { game.submit(it) }
             .blockingFirst()
         val finished = game.stateFlow.ofType(Finished::class.java).blockingFirst()

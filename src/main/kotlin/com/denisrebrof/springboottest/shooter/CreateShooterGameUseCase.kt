@@ -18,8 +18,8 @@ class CreateShooterGameUseCase @Autowired constructor(
     private val stateSyncDelayMs = 200L
 
     private val defaultSettings = ShooterGameSettings(
-        redTeamSpawnPos = Transform(0f, 0f, 0f, 0f),
-        blueTeamSpawnPos = Transform(10f, 0f, 0f, 0f),
+        redTeamSpawnPos = Transform(0f, 20f, 0f, 0f),
+        blueTeamSpawnPos = Transform(10f, 20f, 0f, 0f),
         respawnDelay = 3000L,
         prepareDelay = 2500L,
         gameDuration = 1000000L,

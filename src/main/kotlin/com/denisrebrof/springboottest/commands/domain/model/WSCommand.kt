@@ -18,4 +18,6 @@ enum class WSCommand(val id: Long) {
     IntentSelectWeapon(12L),
     IntentShoot(13L),
     IntentHit(14L),
+
+    LeaveMatch(15L),
 }

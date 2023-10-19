@@ -39,12 +39,8 @@ class ShooterGame private constructor(
         is ShooterGameIntents.Hit -> hit(intent)
     }
 
-    private fun selectWeapon(intent: Intent.SelectWeapon) {
-        val prevState = state
-        state.copyAndSet {
-            getPlayerStateOptional(intent.playerId).selectedWeaponId set intent.weaponId
-        }
-        val postState = state
+    private fun selectWeapon(intent: Intent.SelectWeapon) = state.copyAndSet {
+        getPlayerStateOptional(intent.playerId).selectedWeaponId set intent.weaponId
     }
 
     private fun hit(intent: Intent.Hit) = state.copyAndSet {
