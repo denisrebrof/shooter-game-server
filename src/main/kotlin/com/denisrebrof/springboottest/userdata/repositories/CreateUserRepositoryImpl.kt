@@ -17,6 +17,7 @@ class CreateUserRepositoryImpl @Autowired constructor(
     private val userRepository: IUserRepository,
     private val userDataRepository: UserDataRepository,
 ) : ICreateUserRepository {
+
     override fun createUser(identity: UserIdentity): CreateUserResult {
         if (identity.id.isBlank())
             return CreateUserResult.Failure(Reason.IncorrectIdentity)
@@ -25,7 +26,7 @@ class CreateUserRepositoryImpl @Autowired constructor(
             return CreateUserResult.Failure(Reason.IdentityCollision)
 
         val newUserData = UserData(
-            username = "New User",
+            username = UserNameFactory.createNewNick(),
             yandexId = if (identity.type == UserIdentityType.YandexId) identity.id else "",
             localId = if (identity.type == UserIdentityType.LocalId) identity.id else ""
         )

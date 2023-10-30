@@ -21,9 +21,9 @@ class CreateShooterGameUseCase @Autowired constructor(
         redTeamSpawnPos = Transform(0f, 20f, 0f, 0f),
         blueTeamSpawnPos = Transform(10f, 20f, 0f, 0f),
         respawnDelay = 3000L,
-        prepareDelay = 2500L,
-        gameDuration = 1000000L,
-        completeDelay = 10000L
+        prepareDelay = 5000L,
+        gameDuration = 100000L,
+        completeDelay = 5000L
     )
 
     fun create(playerIds: List<Long>) = ShooterGame
