@@ -5,7 +5,6 @@ plugins {
 }
 
 group = "com.denisrebrof"
-version = "unspecified"
 
 repositories {
     mavenCentral()

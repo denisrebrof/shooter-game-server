@@ -1,9 +1,15 @@
 rootProject.name = "spring-boot-test"
 include("games")
-include("gameentities")
 include("core")
 include("utils")
 include("shooter")
+include("matches")
+include("user")
+include("userdata")
+include("sessions")
+include("commands")
+include("balance")
+include("lobby")
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
@@ -16,8 +22,15 @@ dependencyResolutionManagement {
 
             //Spring
             val springLibsVersion = "5.3.24"
+            val springSecurityVersion = "5.8.1"
             library("springBeans", "org.springframework:spring-beans:$springLibsVersion")
             library("springContext", "org.springframework:spring-context:$springLibsVersion")
+            library("springWeb", "org.springframework:spring-web:$springLibsVersion")
+            library("springWebsocket", "org.springframework:spring-websocket:$springLibsVersion")
+            library("springJpa", "org.springframework.data:spring-data-jpa:2.7.6")
+            library("springSecurityCrypto", "org.springframework.security:spring-security-crypto:$springSecurityVersion")
+
+            library("hibernate", "org.hibernate:hibernate-core:5.6.14.Final")
 
             //Arrow
             val arrowVersion = "1.2.0"

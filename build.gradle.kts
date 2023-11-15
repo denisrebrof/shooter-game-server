@@ -4,7 +4,6 @@ plugins {
     id("org.springframework.boot") version "2.7.6"
     id("io.spring.dependency-management") version "1.1.0"
     id("com.google.devtools.ksp") version "1.8.21-1.0.11"
-    kotlin("plugin.serialization") version "1.7.20"
     kotlin("kapt") version "1.8.21"
     kotlin("jvm") version "1.7.22"
     kotlin("plugin.spring") version "1.7.22"
@@ -39,7 +38,10 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":games"))
     implementation(project(":shooter"))
-    implementation(project(":gameentities"))
+    implementation(project(":matches"))
+    implementation(project(":user"))
+    implementation(project(":userdata"))
+    implementation(project(":commands"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
@@ -57,13 +59,7 @@ dependencies {
     runtimeOnly("com.h2database:h2")
 
     implementation(libs.lombok)
-    implementation(libs.kotlinxSerialization)
     implementation(libs.rxjava3)
-
-    implementation(libs.arrowCore)
-    implementation(libs.arrowOptics)
-    implementation(libs.arrowOpticsReflect)
-    ksp(libs.arrowOpticsPlugin)
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

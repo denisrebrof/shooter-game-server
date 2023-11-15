@@ -1,8 +1,8 @@
 package com.denisrebrof.springboottest.config.security
 
-import com.denisrebrof.springboottest.user.domain.model.UserIdentity
-import com.denisrebrof.springboottest.user.domain.model.UserIdentityType
-import com.denisrebrof.springboottest.user.domain.repositories.IUserRepository
+import com.denisrebrof.user.domain.model.UserIdentity
+import com.denisrebrof.user.domain.model.UserIdentityType
+import com.denisrebrof.user.domain.repositories.IUserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder
 class AuthConfig @Autowired constructor(
     private val userRepository: IUserRepository
 ) {
-
     @Bean
     fun userDetailsService() = UserDetailsService { username ->
         username ?: throw UsernameNotFoundException("username is null")

@@ -9,19 +9,17 @@ import org.springframework.security.web.SecurityFilterChain
 @Configuration
 @EnableWebSecurity
 class WebSecurityConfig {
-
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        return http
-            .authorizeHttpRequests { registry ->
-                registry.requestMatchers("/websocket").permitAll()
-                registry.anyRequest().authenticated()
-            }
-            .anonymous().disable()
-            .httpBasic()
-            .and()
-            .cors().disable()
-            .csrf().disable()
-            .build()
-    }
+    fun filterChain(http: HttpSecurity): SecurityFilterChain = http
+        .authorizeHttpRequests { registry ->
+            registry.requestMatchers("/websocket").permitAll()
+            registry.requestMatchers("/matches").permitAll()
+            registry.anyRequest().authenticated()
+        }
+        .anonymous().disable()
+        .httpBasic()
+        .and()
+        .cors().disable()
+        .csrf().disable()
+        .build()
 }

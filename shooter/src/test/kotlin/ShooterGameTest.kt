@@ -1,7 +1,9 @@
-import gameentities.Transform
-import model.Finished
-import model.PlayingState
-import model.ShooterGameIntents
+import com.denisrebrof.games.Transform
+import com.denisrebrof.shooter.domain.ShooterGame
+import com.denisrebrof.shooter.domain.ShooterGameSettings
+import com.denisrebrof.shooter.domain.model.Finished
+import com.denisrebrof.shooter.domain.model.PlayingState
+import com.denisrebrof.shooter.domain.model.ShooterGameIntents
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
@@ -19,7 +21,7 @@ class ShooterGameTest {
             .stateFlow
             .ofType(PlayingState::class.java)
             .delay(100L, TimeUnit.MILLISECONDS)
-            .map { ShooterGameIntents.Shoot(1L, 1L, Transform(0f, 0f, 0f, 0f)) }
+            .map { ShooterGameIntents.Hit(1L, 1L, 120, Transform(0f, 0f, 0f, 0f), 2L) }
             .doOnNext { game.submit(it) }
             .blockingFirst()
         val finished = game.stateFlow.ofType(Finished::class.java).blockingFirst()

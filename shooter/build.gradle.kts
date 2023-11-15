@@ -7,16 +7,17 @@ plugins {
 }
 
 group = "com.denisrebrof"
-version = "unspecified"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation(project(":commands"))
+    implementation(project(":user"))
     implementation(project(":utils"))
-    implementation(project(":gameentities"))
     implementation(project(":games"))
+    implementation(project(":matches"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
