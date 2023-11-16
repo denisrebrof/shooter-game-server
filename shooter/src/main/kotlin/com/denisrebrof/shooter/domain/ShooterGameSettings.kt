@@ -14,7 +14,6 @@ data class ShooterGameSettings(
         Transform(24.37194f, 17.23f, -54.56653f, 0f),
         Transform(-22.27883f, 17.38f, -56.3633f, 0f)
     ),
-    val maxPlayers: Int = 16,
     val respawnDelay: Long = 3000L,
     val prepareDelay: Long = 10000L,
     val gameDuration: Long = 100000L,

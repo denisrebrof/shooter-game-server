@@ -20,6 +20,9 @@ enum class WSCommand(val id: Long) {
     IntentHit(14L),
 
     LeaveMatch(15L),
-    AddToDevLobby(16L),
+    JoinMatch(16L),
     TimeLeft(17L),
+    GetGames(18L),
+
+    ActionJoinedStateChange(19L),
 }

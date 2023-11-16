@@ -2,6 +2,7 @@ package com.denisrebrof.shooter.domain.model
 
 import arrow.optics.optics
 import com.denisrebrof.games.Transform
+import com.denisrebrof.shooter.domain.usecases.ShooterGameNotificationsUseCase
 
 enum class PlayerTeam(val id: Int) {
     Red(1),
@@ -64,4 +65,17 @@ val ShooterGameState.timeLeft: Long
         is Finished -> 0L
         is PlayingState -> gameDuration + startTime - System.currentTimeMillis()
         is Preparing -> gameDuration
+    }
+
+enum class GameStateTypeResponse(val code: Long) {
+    Preparing(1L),
+    Playing(2L),
+    Finished(3L),
+}
+
+val ShooterGameState.responseType: GameStateTypeResponse
+    get() = when (this) {
+        is Preparing -> GameStateTypeResponse.Preparing
+        is PlayingState -> GameStateTypeResponse.Playing
+        is Finished -> GameStateTypeResponse.Finished
     }

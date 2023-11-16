@@ -35,6 +35,10 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
                 .let(Json::encodeToString)
                 .let(NotificationContent::Data)
 
+            is ShooterGameActions.JoinedStateChange -> WSCommand.ActionJoinedStateChange to action
+                .let(Json::encodeToString)
+                .let(NotificationContent::Data)
+
             ShooterGameActions.LifecycleCompleted -> return
         }
         playerIds.forEach { playerId ->
@@ -51,7 +55,7 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
         typeCode = state.responseType.code,
         playerData = state.playersData,
         winnerTeamId = ShooterGameState.finished.winnerTeam.getOrNull(state)?.id ?: 0,
-        readTeamKills = ShooterGameState.playingState.redTeamKills.getOrNull(state)
+        redTeamKills = ShooterGameState.playingState.redTeamKills.getOrNull(state)
             ?: ShooterGameState.finished.redTeamKills.getOrNull(state)
             ?: 0,
         blueTeamKills = ShooterGameState.playingState.blueTeamKills.getOrNull(state)
@@ -64,7 +68,7 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
         val typeCode: Long,
         val playerData: List<PlayerDataResponse>,
         val winnerTeamId: Int,
-        val readTeamKills: Int,
+        val redTeamKills: Int,
         val blueTeamKills: Int,
     )
 
@@ -124,17 +128,4 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
                 PlayerDataResponse.fromDataOnly(id, data)
             }
         }
-
-    private val ShooterGameState.responseType: GameStateTypeResponse
-        get() = when (this) {
-            is Preparing -> GameStateTypeResponse.Preparing
-            is PlayingState -> GameStateTypeResponse.Playing
-            is Finished -> GameStateTypeResponse.Finished
-        }
-
-    enum class GameStateTypeResponse(val code: Long) {
-        Preparing(1L),
-        Playing(2L),
-        Finished(3L),
-    }
 }

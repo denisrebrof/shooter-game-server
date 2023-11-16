@@ -31,6 +31,8 @@ class MatchService(
 
     fun getMatches(): List<Match> = matches.values.toList()
 
+    fun get(matchId: String) = matches[matchId]
+
     fun getByUserId(userID: Long) = participantIdToMatchId[userID]
 
     fun hasByUserId(userID: Long): Boolean = participantIdToMatchId.containsKey(userID)
@@ -40,8 +42,8 @@ class MatchService(
         val newParticipants = userIds.filterNot(::hasByUserId)
         val matchParticipants = match.participants.toMutableSet()
         matchParticipants.addAll(newParticipants)
-        val newMatch = match.copy(participants = matchParticipants)
-        matches[matchId] = newMatch
+        matches[matchId] = match.copy(participants = matchParticipants)
+        newParticipants.forEach { participantIdToMatchId[it] = matchId }
         val newParticipantsArray = newParticipants.toLongArray()
         listeners.forEach { listener -> listener.onJoined(match, *newParticipantsArray) }
     }
@@ -51,6 +53,7 @@ class MatchService(
         val existingParticipants = userIds.filter(::hasByUserId)
         val matchParticipants = match.participants.toMutableSet()
         matchParticipants.removeAll(existingParticipants.toSet())
+        existingParticipants.forEach(participantIdToMatchId::remove)
 
         if (matchParticipants.isEmpty())
             return remove(matchId)
@@ -59,5 +62,9 @@ class MatchService(
         matches[matchId] = newMatch
         val existingParticipantsArray = existingParticipants.toLongArray()
         listeners.forEach { listener -> listener.onLeft(match, *existingParticipantsArray) }
+    }
+
+    companion object {
+        val MAX_PARTICIPANTS = 16
     }
 }

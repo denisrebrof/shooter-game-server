@@ -10,7 +10,7 @@ import com.denisrebrof.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Completable
 import com.denisrebrof.shooter.domain.model.PlayerTeam.Blue
 import com.denisrebrof.shooter.domain.model.PlayerTeam.Red
-import com.denisrebrof.shooter.domain.model.ShooterGameState
+import com.denisrebrof.shooter.domain.model.ShooterGameActions
 import java.util.concurrent.TimeUnit
 import com.denisrebrof.shooter.domain.model.ShooterGameActions as Action
 import com.denisrebrof.shooter.domain.model.ShooterGameIntents as Intent
@@ -51,21 +51,23 @@ class ShooterGame private constructor(
     }
 
     override fun addPlayers(vararg players: Long) = state.copyAndSet {
-        ShooterGameState.playingState.players transform { it + createJoinedPlayerStateMap(*players) }
-        ShooterGameState.preparing.pendingPlayers transform { it + createPendingPlayerStateMap(*players) }
+        State.playingState.players transform { it + createJoinedPlayerStateMap(*players) }
+        State.preparing.pendingPlayers transform { it + createPendingPlayerStateMap(*players) }
+        players.map { ShooterGameActions.JoinedStateChange(it, true) }.forEach(::send)
     }
 
     override fun removePlayers(vararg players: Long) = state.copyAndSet {
-        ShooterGameState.playingState.players transform { playerStateMap ->
+        State.playingState.players transform { playerStateMap ->
             val playerStateMutableMap = playerStateMap.toMutableMap()
             players.forEach(playerStateMutableMap::remove)
             return@transform playerStateMutableMap
         }
-        ShooterGameState.preparing.pendingPlayers transform { playerStateMap ->
+        State.preparing.pendingPlayers transform { playerStateMap ->
             val playerStateMutableMap = playerStateMap.toMutableMap()
             players.forEach(playerStateMutableMap::remove)
             return@transform playerStateMutableMap
         }
+        players.map { ShooterGameActions.JoinedStateChange(it, false) }.forEach(::send)
     }
 
     private fun selectWeapon(intent: Intent.SelectWeapon) = state.copyAndSet {
@@ -94,8 +96,8 @@ class ShooterGame private constructor(
 
         val killerTeam = shooter.data.team.getOrNull(state)
         val killerTeamCounter = when (killerTeam) {
-            Red -> ShooterGameState.playingState.redTeamKills
-            else -> ShooterGameState.playingState.blueTeamKills
+            Red -> State.playingState.redTeamKills
+            else -> State.playingState.blueTeamKills
         }
         killerTeamCounter transform { it + 1 }
 
@@ -134,7 +136,7 @@ class ShooterGame private constructor(
         }
     }
 
-    private fun getPlayerStateOptional(playerId: Long) = ShooterGameState
+    private fun getPlayerStateOptional(playerId: Long) = State
         .playingState
         .players
         .index(Index.map(), playerId)
@@ -184,7 +186,7 @@ class ShooterGame private constructor(
     }
 
     private fun getPendingPlayerTeam(): PlayerTeam? {
-        val players = ShooterGameState.preparing.pendingPlayers.getOrNull(state)?.values ?: return null
+        val players = State.preparing.pendingPlayers.getOrNull(state)?.values ?: return null
         val teamsToPlayerCount = players
             .groupBy { player -> player.team }
             .mapValues { (_, teamPlayers) -> teamPlayers.size }
@@ -195,14 +197,10 @@ class ShooterGame private constructor(
     }
 
     private fun getJoinedPlayerTeam(): PlayerTeam? {
-        val players = ShooterGameState.playingState.players.getOrNull(state)?.values ?: return null
-        val teamsToPlayerCount = players
-            .groupBy { player -> player.data.team }
-            .mapValues { (_, teamPlayers) -> teamPlayers.size }
-        return teamsToPlayerCount
-            .minByOrNull { (_, playerCount) -> playerCount }
-            ?.key
-            ?: Red
+        val players = State.playingState.players.getOrNull(state)?.values ?: return null
+        val redTeamCount = players.count { player -> player.data.team == Red }
+        val blueTeamCount = players.size - redTeamCount
+        return if (redTeamCount > blueTeamCount) Blue else Red
     }
 
     private fun createPlayerPlayingState(team: PlayerTeam) = Playing(

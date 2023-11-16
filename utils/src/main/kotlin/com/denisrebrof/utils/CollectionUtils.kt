@@ -14,3 +14,18 @@ fun <T, K : Any, V : Any> Iterable<T>.associateByNotNull(
 fun <T : Any, V : Any> Iterable<T>.associateWithNotNull(
     valueTransform: (T) -> V?,
 ): Map<T, V> = associateByNotNull({key -> key}, valueTransform)
+
+fun <T> Iterable<T>.chunkedFixed(size: Int): List<List<T>> = chunked(size).filter { it.size == size }
+
+public fun <T> Iterator<T>.another(n: Int): List<T> {
+    require(n >= 0) { "Requested element count $n is less than zero." }
+    if (n == 0) return emptyList()
+    var count = 0
+    val list = ArrayList<T>(n)
+    for (item in this) {
+        list.add(item)
+        if (++count == n)
+            break
+    }
+    return list
+}

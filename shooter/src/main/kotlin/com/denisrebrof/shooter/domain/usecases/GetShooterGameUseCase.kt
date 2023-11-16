@@ -13,4 +13,8 @@ class GetShooterGameUseCase @Autowired constructor(
     fun get(userId: Long) = matchService
         .getByUserId(userId)
         ?.let(service::get)
+
+    fun getAll() = matchService
+        .getMatches()
+        .mapNotNull { match -> service.get(match.id) }
 }

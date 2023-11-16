@@ -19,4 +19,10 @@ sealed class ShooterGameActions {
         val hpLoss: Int,
         val killed: Boolean
     ): ShooterGameActions()
+
+    @Serializable
+    data class JoinedStateChange(
+        val playerId: Long,
+        val joined: Boolean
+    ): ShooterGameActions()
 }
