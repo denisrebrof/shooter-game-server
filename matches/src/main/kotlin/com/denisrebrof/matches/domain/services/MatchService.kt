@@ -65,6 +65,6 @@ class MatchService(
     }
 
     companion object {
-        val MAX_PARTICIPANTS = 16
+        const val MAX_PARTICIPANTS = 16
     }
 }

@@ -20,7 +20,7 @@ class CreateShooterGameUseCase @Autowired constructor(
         respawnDelay = 3000L,
         prepareDelay = 5000L,
         gameDuration = 1000000L,
-        completeDelay = 5000L
+        completeDelay = 50000L
     )
 
     fun create(playerIds: List<Long>) = ShooterGame

@@ -15,16 +15,15 @@ class ShooterGameService @Autowired constructor(
     private val createGameUseCase: CreateShooterGameUseCase
 ) : MatchGameService<ShooterGame>() {
 
-    private val clearFinishedGameDelayMs: Long = 15000L
+    private val clearFinishedGameDelayMs: Long = 1000L
 
     override fun createGame(match: Match): ShooterGame = match
         .participants
         .toList()
         .let(createGameUseCase::create)
-        .also { createClearFinishedMatchHandler(match.id) }
+        .also { game -> createClearFinishedMatchHandler(match.id, game) }
 
-    private fun createClearFinishedMatchHandler(matchId: String) {
-        val game = get(matchId) ?: return
+    private fun createClearFinishedMatchHandler(matchId: String, game: ShooterGame) {
         game
             .actions
             .filter(Actions.LifecycleCompleted::equals)
