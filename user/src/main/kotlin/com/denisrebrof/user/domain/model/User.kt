@@ -10,7 +10,8 @@ data class User(
 
 data class UserIdentity(
     val id: String,
-    val type: UserIdentityType
+    val type: UserIdentityType,
+    val password: String = ""
 ) {
     companion object {
         fun fromUserId(userId: Long): UserIdentity {

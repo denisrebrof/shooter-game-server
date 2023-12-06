@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":games"))
     implementation(project(":matches"))
+    implementation(project(":simplestats"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 

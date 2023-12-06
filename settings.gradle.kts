@@ -10,6 +10,7 @@ include("sessions")
 include("commands")
 include("balance")
 include("lobby")
+include("simplestats")
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {

@@ -27,9 +27,10 @@ class CreateUserRepositoryImpl @Autowired constructor(
             return Failure(Reason.IdentityCollision)
 
         val newUserData = UserData(
-            username = UserNameFactory.createNewNick(),
+            username = if (identity.type == UserIdentityType.Username) identity.id else UserNameFactory.createNewNick(),
             yandexId = if (identity.type == UserIdentityType.YandexId) identity.id else "",
-            localId = if (identity.type == UserIdentityType.LocalId) identity.id else ""
+            localId = if (identity.type == UserIdentityType.LocalId) identity.id else "",
+            password = identity.password
         )
         return userDataRepository
             .save(newUserData)

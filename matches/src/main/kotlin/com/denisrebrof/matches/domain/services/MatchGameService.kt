@@ -14,6 +14,9 @@ abstract class MatchGameService<TGame> : IMatchServiceListener where TGame : IPa
 
     private val matchIdToGame = mutableMapOf<String, TGame>()
 
+    protected val gamesMap: Map<String, TGame>
+        get() = matchIdToGame
+
     abstract fun createGame(match: Match): TGame
 
     fun get(matchId: String) = matchIdToGame[matchId]
