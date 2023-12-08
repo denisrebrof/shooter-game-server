@@ -25,4 +25,7 @@ enum class WSCommand(val id: Long) {
     GetGames(18L),
 
     ActionJoinedStateChange(19L),
+
+    GetUserName(20L),
+    SetUserName(21L),
 }

@@ -5,4 +5,5 @@ import com.denisrebrof.user.domain.model.UserIdentity
 
 interface IUserRepository {
     fun find(identity: UserIdentity): User?
+    fun updateNick(identity: UserIdentity, newNick: String): Boolean
 }
