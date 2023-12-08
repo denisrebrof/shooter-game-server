@@ -5,22 +5,21 @@ import arrow.optics.typeclasses.Index
 import com.denisrebrof.games.MVIGameHandler
 import com.denisrebrof.matches.domain.model.IParticipantsHandler
 import com.denisrebrof.shooter.domain.model.*
+import com.denisrebrof.shooter.domain.model.PlayerTeam.Blue
+import com.denisrebrof.shooter.domain.model.PlayerTeam.Red
 import com.denisrebrof.utils.associateWithNotNull
 import com.denisrebrof.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Completable
-import com.denisrebrof.shooter.domain.model.PlayerTeam.Blue
-import com.denisrebrof.shooter.domain.model.PlayerTeam.Red
-import com.denisrebrof.shooter.domain.model.ShooterGameActions
 import java.util.concurrent.TimeUnit
 import com.denisrebrof.shooter.domain.model.ShooterGameActions as Action
 import com.denisrebrof.shooter.domain.model.ShooterGameIntents as Intent
 import com.denisrebrof.shooter.domain.model.ShooterGameState as State
 
 class ShooterGame private constructor(
-    private val settings: ShooterGameSettings,
+    val settings: ShooterGameSettings,
     players: Map<Long, ShooterPlayerData>
 ) : MVIGameHandler<State, Intent, Action>(
-    initialState = Preparing(players, settings.gameDuration)
+    initialState = Preparing(players)
 ), IParticipantsHandler {
 
     private val spawnIterator = ShooterSpawnIterator(
@@ -53,7 +52,7 @@ class ShooterGame private constructor(
     override fun addPlayers(vararg players: Long) = state.copyAndSet {
         State.playingState.players transform { it + createJoinedPlayerStateMap(*players) }
         State.preparing.pendingPlayers transform { it + createPendingPlayerStateMap(*players) }
-        players.map { ShooterGameActions.JoinedStateChange(it, true) }.forEach(::send)
+        players.map { Action.JoinedStateChange(it, true) }.forEach(::send)
     }
 
     override fun removePlayers(vararg players: Long) = state.copyAndSet {
@@ -67,7 +66,7 @@ class ShooterGame private constructor(
             players.forEach(playerStateMutableMap::remove)
             return@transform playerStateMutableMap
         }
-        players.map { ShooterGameActions.JoinedStateChange(it, false) }.forEach(::send)
+        players.map { Action.JoinedStateChange(it, false) }.forEach(::send)
     }
 
     private fun selectWeapon(intent: Intent.SelectWeapon) = state.copyAndSet {
@@ -162,8 +161,7 @@ class ShooterGame private constructor(
             players = preparing.pendingPlayers.mapValues { (_, data) ->
                 val dynamicState = createPlayerPlayingState(data.team)
                 ShooterPlayerState(data, 0L, dynamicState)
-            },
-            gameDuration = preparing.gameDuration
+            }
         )
 
     private fun createPendingPlayerStateMap(vararg players: Long): Map<Long, ShooterPlayerData> = players
@@ -206,7 +204,9 @@ class ShooterGame private constructor(
     private fun createPlayerPlayingState(team: PlayerTeam) = Playing(
         hp = 100,
         transform = spawnIterator.fetchNextSpawn(team),
-        verticalLookAngle = 0f
+        verticalLookAngle = 0f,
+        crouching = false,
+        aiming = false
     )
 
     companion object {

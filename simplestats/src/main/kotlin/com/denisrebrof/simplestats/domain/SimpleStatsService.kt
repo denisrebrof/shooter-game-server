@@ -12,6 +12,9 @@ class SimpleStatsService : ISimpleStatsReceiver {
 
     private val maxLogSize = 200
 
+    val currentDateText: String
+        get() = Date().toGMTString()
+
     fun getLogs(): List<String> = logs
 
     fun getProperties(): Map<String, String> = properties
@@ -21,7 +24,7 @@ class SimpleStatsService : ISimpleStatsReceiver {
         if (logs.size >= maxLogSize)
             logs.removeFirst()
 
-        logs.add(content)
+        logs.add("[$currentDateText] $content")
     }
 
     override fun setProperty(name: String, property: ISimpleStatsProperty) {

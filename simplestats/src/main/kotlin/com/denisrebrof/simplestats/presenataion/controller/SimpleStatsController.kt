@@ -9,14 +9,24 @@ import org.springframework.web.bind.annotation.RestController
 class SimpleStatsController @Autowired constructor(
     private val statsService: SimpleStatsService
 ) {
-    @GetMapping("/my_logs")
-    fun getLogs(): String = statsService
-        .getLogs()
-        .joinToString(separator = "<br>")
+    private val logsList
+        get() = statsService
+            .getLogs()
+            .joinToString(separator = "<br>")
 
-    @GetMapping("/stat_props")
-    fun getProps(): String = statsService
-        .getProperties()
-        .toList()
-        .joinToString(separator = "<br>") { (k, v) -> "$k : $v" }
+    private val propsList
+        get() = statsService
+            .getProperties()
+            .toList()
+            .joinToString(separator = "<br>") { (k, v) -> "$k : $v" }
+
+    @GetMapping("/stats")
+    fun getStats(): String = buildString {
+        appendLine("Properties<br><br>")
+        appendLine(propsList)
+        appendLine("<br>")
+        appendLine("Logs list<br>")
+        appendLine("Current time: ${statsService.currentDateText}<br><br>")
+        appendLine(logsList)
+    }
 }
