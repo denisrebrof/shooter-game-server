@@ -12,8 +12,8 @@ data class ShooterGameSettings(
         Transform(17f, 2f, -45f, 0f),
         Transform(32f, -2f, -32f, 0f),
     ),
-    val respawnDelay: Long = 3000L,
-    val prepareDelay: Long = 10000L,
-    val gameDuration: Long = 100000L,
-    val completeDelay: Long = 10000L,
+    val respawnDelay: Long,
+    val prepareDelay: Long,
+    val gameDuration: Long,
+    val completeDelay: Long,
 )

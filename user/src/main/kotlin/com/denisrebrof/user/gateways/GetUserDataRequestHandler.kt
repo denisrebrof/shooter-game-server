@@ -5,7 +5,7 @@ import com.denisrebrof.commands.domain.model.ResponseState
 import com.denisrebrof.user.domain.model.UserIdentity
 import com.denisrebrof.commands.domain.model.WSCommand
 import com.denisrebrof.user.domain.repositories.IUserRepository
-import com.denisrebrof.user.gateways.model.UserData
+import com.denisrebrof.user.gateways.model.UserDataResponse
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +37,7 @@ class GetUserDataRequestHandler @Autowired constructor(
             .let(userRepository::find)
             ?: return userNotFoundResponse
 
-        return UserData.fromUser(user)
+        return UserDataResponse.fromUser(user)
             .let(Json::encodeToString)
             .let(ResponseState::CreatedResponse)
     }

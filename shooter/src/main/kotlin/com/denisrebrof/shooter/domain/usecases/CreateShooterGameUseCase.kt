@@ -19,8 +19,8 @@ class CreateShooterGameUseCase @Autowired constructor(
     private val defaultSettings = ShooterGameSettings(
         respawnDelay = 3000L,
         prepareDelay = 5000L,
-        gameDuration = 1000000L,
-        completeDelay = 50000L
+        gameDuration = 1000L * 10,
+        completeDelay = 10000L
     )
 
     fun create(playerIds: List<Long>) = ShooterGame

@@ -15,6 +15,10 @@ data class UserData(
     val role: UserRole = UserRole.Default,
     val yandexId: String = "",
     val localId: String = "",
+    val kills: Int = 0,
+    val death: Int = 0,
+    val gamesPlayed: Int = 0,
+    val gamesWon: Int = 0,
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "owner_id")
     val balances: List<UserBalance> = listOf()
@@ -29,10 +33,5 @@ data class UserData(
     }
 
     override fun hashCode(): Int = javaClass.hashCode()
-
-    @Override
-    override fun toString(): String {
-        return this::class.simpleName + "(id = $id , username = $username , password = $password , role = $role , yandexId = $yandexId , localId = $localId )"
-    }
 }
 

@@ -14,6 +14,7 @@ repositories {
 dependencies {
     implementation(project(":user"))
     implementation(project(":balance"))
+    implementation(project(":shooter"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation(libs.rxjava3)
