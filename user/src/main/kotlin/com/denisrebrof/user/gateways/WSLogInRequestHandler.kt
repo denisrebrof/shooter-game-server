@@ -1,13 +1,15 @@
 package com.denisrebrof.user.gateways
 
-import com.denisrebrof.user.domain.LogInUseCase
-import com.denisrebrof.user.domain.model.AuthParams.*
-import com.denisrebrof.user.domain.model.LoginResult
 import com.denisrebrof.commands.domain.model.ResponseErrorCodes
 import com.denisrebrof.commands.domain.model.ResponseState
 import com.denisrebrof.commands.domain.model.WSCommand
-import com.denisrebrof.user.gateways.WSLogInRequestHandler.AuthParamsData
 import com.denisrebrof.commands.gateways.WSSessionRequestHandler
+import com.denisrebrof.simplestats.domain.ISimpleStatsReceiver
+import com.denisrebrof.simplestats.domain.setPropertyString
+import com.denisrebrof.user.domain.LogInUseCase
+import com.denisrebrof.user.domain.model.AuthParams.*
+import com.denisrebrof.user.domain.model.LoginResult
+import com.denisrebrof.user.gateways.WSLogInRequestHandler.AuthParamsData
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -17,8 +19,17 @@ import org.springframework.stereotype.Service
 
 @Service
 class WSLogInRequestHandler @Autowired constructor(
-    private val logInUseCase: LogInUseCase
+    private val logInUseCase: LogInUseCase,
+    statsReceiver: ISimpleStatsReceiver
 ) : WSSessionRequestHandler<AuthParamsData>(WSCommand.LogIn.id) {
+
+    private var successfulLoginsCount = 0L
+    private var failedLoginsCount = 0L
+
+    init {
+        statsReceiver.setPropertyString("Successful logins") { successfulLoginsCount.toString() }
+        statsReceiver.setPropertyString("Failed logins") { failedLoginsCount.toString() }
+    }
 
     private val incorrectAuthParamsResponse = ResponseState.ErrorResponse(
         ResponseErrorCodes.Unauthorized.code,
@@ -37,6 +48,7 @@ class WSLogInRequestHandler @Autowired constructor(
         }
         return@with logInUseCase
             .login(params, sessionId)
+            .also(::handleStatsCounter)
             .let(::createResponse)
             .let(Json::encodeToString)
             .let(ResponseState::CreatedResponse)
@@ -45,6 +57,11 @@ class WSLogInRequestHandler @Autowired constructor(
     private fun createResponse(result: LoginResult) = when (result) {
         LoginResult.Failed -> LoginResponse(false)
         is LoginResult.Success -> LoginResponse(true, result.token, result.userId)
+    }
+
+    private fun handleStatsCounter(result: LoginResult) = when (result) {
+        LoginResult.Failed -> failedLoginsCount += 1
+        is LoginResult.Success -> successfulLoginsCount += 1
     }
 
     @Serializable

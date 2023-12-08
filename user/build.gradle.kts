@@ -15,6 +15,7 @@ repositories {
 dependencies {
 
     implementation(project(":commands"))
+    implementation(project(":simplestats"))
     implementation(libs.kotlinxSerialization)
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation(libs.rxjava3)

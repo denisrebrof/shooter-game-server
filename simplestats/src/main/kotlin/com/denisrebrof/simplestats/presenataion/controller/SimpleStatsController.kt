@@ -25,6 +25,7 @@ class SimpleStatsController @Autowired constructor(
         appendLine("Properties<br><br>")
         appendLine(propsList)
         appendLine("<br>")
+        appendLine("<br>")
         appendLine("Logs list<br>")
         appendLine("Current time: ${statsService.currentDateText}<br><br>")
         appendLine(logsList)
