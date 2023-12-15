@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest.config.security
+package com.denisrebrof.config.security
 
 import com.denisrebrof.user.domain.model.UserIdentity
 import com.denisrebrof.user.domain.model.UserIdentityType

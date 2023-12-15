@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest.config
+package com.denisrebrof.config
 
 import com.denisrebrof.commands.gateways.WSHandler
 import org.springframework.beans.factory.annotation.Autowired

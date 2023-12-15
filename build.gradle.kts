@@ -42,6 +42,7 @@ dependencies {
     implementation(project(":user"))
     implementation(project(":userdata"))
     implementation(project(":commands"))
+    testImplementation(project(":userdata"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")

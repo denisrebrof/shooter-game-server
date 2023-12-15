@@ -1,5 +1,6 @@
 package com.denisrebrof.userdata.repositories
 
+import com.denisrebrof.shooter.domain.model.ShooterGameRating
 import com.denisrebrof.shooter.domain.repositories.IShooterGamePlayerStatsRepository
 import com.denisrebrof.userdata.internal.UserDataRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,5 +22,10 @@ class ShooterGamePlayerStatsRepositoryImpl @Autowired constructor(
                 )
             }
             ?.let(userDataRepository::save)
+    }
+
+    override fun getRating(userId: Long, size: Int): List<ShooterGameRating> {
+//        val
+        return emptyList()
     }
 }

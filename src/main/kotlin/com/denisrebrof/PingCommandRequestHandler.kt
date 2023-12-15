@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest
+package com.denisrebrof
 
 import com.denisrebrof.commands.domain.model.ResponseState
 import com.denisrebrof.commands.domain.model.WSCommand

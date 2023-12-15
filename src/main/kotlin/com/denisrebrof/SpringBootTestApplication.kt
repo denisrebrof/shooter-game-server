@@ -1,4 +1,4 @@
-package com.denisrebrof.springboottest
+package com.denisrebrof
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
@@ -10,9 +10,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import javax.servlet.ServletContext
 
 @SpringBootApplication
-@ComponentScan(basePackages = ["com.denisrebrof"])
-@EnableJpaRepositories(basePackages = ["com.denisrebrof"])
-@EntityScan("com.denisrebrof.*")
+@EnableJpaRepositories
+@EntityScan
 class SpringBootTestApplication : SpringBootServletInitializer() {
 
     override fun onStartup(servletContext: ServletContext) {

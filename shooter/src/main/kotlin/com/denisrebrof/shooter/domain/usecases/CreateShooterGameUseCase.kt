@@ -19,7 +19,7 @@ class CreateShooterGameUseCase @Autowired constructor(
     private val defaultSettings = ShooterGameSettings(
         respawnDelay = 3000L,
         prepareDelay = 5000L,
-        gameDuration = 1000L * 10,
+        gameDuration = 1000L * 60 * 5,
         completeDelay = 10000L
     )
 

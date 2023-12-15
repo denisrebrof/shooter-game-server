@@ -13,7 +13,12 @@ val playerIds = listOf(1L, 2L)
 class ShooterGameTest {
     @Test
     fun testGame() {
-        val settings = ShooterGameSettings(prepareDelay = 1000L, gameDuration = 1000L)
+        val settings = ShooterGameSettings(
+            respawnDelay = 1000L,
+            prepareDelay = 1000L,
+            gameDuration = 1000L,
+            completeDelay = 1000L,
+        )
         val game = ShooterGame
             .create(playerIds, settings)
             .also(ShooterGame::start)

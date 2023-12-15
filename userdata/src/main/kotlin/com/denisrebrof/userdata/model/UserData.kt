@@ -15,6 +15,7 @@ data class UserData(
     val role: UserRole = UserRole.Default,
     val yandexId: String = "",
     val localId: String = "",
+    val rating: Int = 0,
     val kills: Int = 0,
     val death: Int = 0,
     val gamesPlayed: Int = 0,
