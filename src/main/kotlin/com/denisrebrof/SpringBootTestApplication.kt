@@ -11,6 +11,7 @@ import javax.servlet.ServletContext
 
 @SpringBootApplication
 @EnableJpaRepositories
+@ComponentScan("com.*")
 @EntityScan
 class SpringBootTestApplication : SpringBootServletInitializer() {
 

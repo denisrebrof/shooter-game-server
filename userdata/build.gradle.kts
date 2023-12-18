@@ -26,10 +26,6 @@ dependencies {
 
     implementation(libs.hibernate)
     implementation(libs.springJpa)
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation(platform(libs.junit))
-    testImplementation(libs.junitJupiter)
 }
 
 tasks.test {
