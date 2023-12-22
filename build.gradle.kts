@@ -25,7 +25,7 @@ repositories {
 }
 
 springBoot {
-    mainClass.set("com.denisrebrof.springboottest.SpringBootTestApplication")
+    mainClass.set("com.denisrebrof.SpringBootTestApplication")
 }
 
 allprojects {
