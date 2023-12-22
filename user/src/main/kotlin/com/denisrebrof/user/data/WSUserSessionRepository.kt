@@ -2,6 +2,8 @@ package com.denisrebrof.user.data
 
 import com.denisrebrof.commands.domain.IWSConnectedSessionRepository.SessionState
 import com.denisrebrof.commands.domain.WSConnectedSessionRepository
+import com.denisrebrof.simplestats.domain.ISimpleStatsReceiver
+import com.denisrebrof.simplestats.domain.setPropertyString
 import com.denisrebrof.user.domain.repositories.IWSUserSessionEventsRepository
 import com.denisrebrof.user.domain.repositories.IWSUserSessionEventsRepository.UserSessionEvent
 import com.denisrebrof.user.domain.repositories.IWSUserSessionEventsRepository.UserSessionEventType
@@ -17,13 +19,20 @@ import kotlin.reflect.safeCast
 
 @Service
 class WSUserSessionRepository @Autowired constructor(
-    private val connectedSessionRepository: WSConnectedSessionRepository
+    private val connectedSessionRepository: WSConnectedSessionRepository,
+    statsReceiver: ISimpleStatsReceiver
 ) : IWSUserSessionRepository, IWSUserSessionMappingRepository, IWSUserSessionEventsRepository {
 
     private val userIdToSessionId = Collections.synchronizedMap(mutableMapOf<Long, String>())
     private val sessionIdToUserId = Collections.synchronizedMap(mutableMapOf<String, Long>())
 
     private val userSessionEvents = PublishProcessor.create<UserSessionEvent>()
+
+    init {
+        statsReceiver.setPropertyString("Current Sessions") {
+            userIdToSessionId.size.toString()
+        }
+    }
 
     override fun getMapping(sessionId: String): Long? = sessionIdToUserId[sessionId]
 

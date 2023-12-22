@@ -22,6 +22,13 @@ class UserRepositoryImpl @Autowired constructor(
         return true
     }
 
+    override fun increaseLoginCount(identity: UserIdentity): Boolean {
+        var data = findData(identity) ?: return false
+        data = data.copy(loginCount = data.loginCount + 1)
+        repository.save(data)
+        return true
+    }
+
     override fun find(identity: UserIdentity): User? = findData(identity)?.toUser()
 
     private fun findData(identity: UserIdentity): UserData? = when (identity.type) {

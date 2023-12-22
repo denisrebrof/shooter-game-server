@@ -35,6 +35,8 @@ class LogInUseCase @Autowired constructor(
         val user = getOrCreateUserUseCase
             .getOrCreate(identity)
             ?: return LoginResult.Failed
+
+        userRepository.increaseLoginCount(identity)
         sessionMappingRepository.addMapping(user.id, sessionId)
         return LoginResult.Success("", user.id)
     }

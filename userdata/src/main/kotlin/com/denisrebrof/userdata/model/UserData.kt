@@ -2,6 +2,7 @@ package com.denisrebrof.userdata.model
 
 import com.denisrebrof.user.domain.model.UserRole
 import org.hibernate.Hibernate
+import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -20,6 +21,9 @@ data class UserData(
     val death: Int = 0,
     val gamesPlayed: Int = 0,
     val gamesWon: Int = 0,
+    val loginCount: Int = 0,
+    @Column(name = "account_creation_time", nullable = true)
+    val accountCreationTime: Date? = Date(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "owner_id")
     val balances: List<UserBalance> = listOf()
