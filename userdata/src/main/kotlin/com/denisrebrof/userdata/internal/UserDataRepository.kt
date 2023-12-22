@@ -1,9 +1,10 @@
 package com.denisrebrof.userdata.internal
 
 import com.denisrebrof.userdata.model.UserData
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.stereotype.Repository
+import org.springframework.data.repository.query.Param
 
 interface UserDataRepository : JpaRepository<UserData, Long> {
     fun findUserDataByUsername(username: String): List<UserData>
@@ -11,11 +12,34 @@ interface UserDataRepository : JpaRepository<UserData, Long> {
     fun findUserDataByLocalId(userId: String): UserData?
     fun findUserDataByYandexId(yandexId: String): UserData?
 
-//    @Query(
-//        "SELECT u FROM UserData u "
-////            + "WHERE CASE WHEN ?3 = TRUE THEN (u.rating>=?2) ELSE (u.rating<=?2) END "
-////            + "ORDER BY CASE WHEN ?3 = TRUE THEN u.rating ELSE -u.rating END"
-////            + ", CASE WHEN ?3 = TRUE THEN u.id ELSE -u.id END"
-//    )
-//    fun getUsersAroundByRating(userId: Long, userRating: Int, findGreater: Boolean): List<UserData>
+    @Query(
+        "SELECT COUNT(*) FROM UserData AS u "
+            + "WHERE u.rating > :userRating OR (u.rating = :userRating AND u.id > :userId) "
+    )
+    fun getUserRatingPos(
+        @Param("userId") userId: Long,
+        @Param("userRating") userRating: Int
+    ): Long
+
+    @Query(
+        "SELECT u FROM UserData AS u "
+            + "WHERE u.rating > :userRating OR (u.rating = :userRating AND u.id > :userId) "
+            + "ORDER BY u.rating, u.id"
+    )
+    fun getUsersWithRatingMore(
+        @Param("userId") userId: Long,
+        @Param("userRating") userRating: Int,
+        pageable: Pageable
+    ): List<UserData>
+
+    @Query(
+        "SELECT u FROM UserData AS u "
+            + "WHERE u.rating < :userRating OR (u.rating = :userRating AND u.id < :userId) "
+            + "ORDER BY u.rating, u.id"
+    )
+    fun getUsersWithRatingLess(
+        @Param("userId") userId: Long,
+        @Param("userRating") userRating: Int,
+        pageable: Pageable
+    ): List<UserData>
 }

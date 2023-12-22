@@ -1,10 +1,9 @@
 package com.denisrebrof.shooter.domain.model
 
-import kotlinx.serialization.Serializable
+import com.denisrebrof.user.domain.model.User
 
-@Serializable
 data class ShooterGameRating(
-    val userId: Long,
-    val position: Int,
+    val user: User,
+    val position: Long,
     val rating: Int
 )

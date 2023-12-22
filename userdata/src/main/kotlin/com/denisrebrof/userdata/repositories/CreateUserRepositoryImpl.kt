@@ -1,8 +1,5 @@
 package com.denisrebrof.userdata.repositories
 
-import com.denisrebrof.userdata.model.UserData
-import com.denisrebrof.userdata.model.UserDataMapper.toUser
-import com.denisrebrof.userdata.internal.UserDataRepository
 import com.denisrebrof.user.domain.model.UserIdentity
 import com.denisrebrof.user.domain.model.UserIdentityType
 import com.denisrebrof.user.domain.repositories.ICreateUserRepository
@@ -10,6 +7,9 @@ import com.denisrebrof.user.domain.repositories.ICreateUserRepository.CreateUser
 import com.denisrebrof.user.domain.repositories.ICreateUserRepository.CreateUserResult.Failure.Reason
 import com.denisrebrof.user.domain.repositories.IUserRepository
 import com.denisrebrof.userdata.UserNameFactory
+import com.denisrebrof.userdata.internal.UserDataRepository
+import com.denisrebrof.userdata.model.UserData
+import com.denisrebrof.userdata.model.UserDataMapper.toUser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
