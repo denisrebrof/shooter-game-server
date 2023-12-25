@@ -22,8 +22,8 @@ data class UserData(
     val gamesPlayed: Int = 0,
     val gamesWon: Int = 0,
     val loginCount: Int = 0,
-    @Column(name = "account_creation_time", nullable = true)
-    val accountCreationTime: Date? = Date(),
+//    @Column(name = "account_creation_time", nullable = true)
+//    val accountCreationTime: Date? = Date(),
     @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "owner_id")
     val balances: List<UserBalance> = listOf()

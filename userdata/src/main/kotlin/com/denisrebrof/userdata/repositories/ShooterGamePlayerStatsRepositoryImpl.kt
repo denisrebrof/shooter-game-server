@@ -1,5 +1,6 @@
 package com.denisrebrof.userdata.repositories
 
+import com.denisrebrof.shooter.domain.model.ShooterGamePlayerStats
 import com.denisrebrof.shooter.domain.model.ShooterGameRating
 import com.denisrebrof.shooter.domain.repositories.IShooterGamePlayerStatsRepository
 import com.denisrebrof.userdata.internal.UserDataRepository
@@ -78,6 +79,17 @@ class ShooterGamePlayerStatsRepositoryImpl @Autowired constructor(
                 val pos = lessRatingSize - index + userPos + 1
                 getRating(pos, userData)
             }
+    }
+
+    override fun getPlayerStats(userId: Long): ShooterGamePlayerStats? {
+        val user = userDataRepository
+            .findUserDataById(userId)
+            ?: return null
+
+        return ShooterGamePlayerStats(
+            user.kills,
+            user.death
+        )
     }
 
     private fun getRating(pos: Long, user: UserData) = ShooterGameRating(

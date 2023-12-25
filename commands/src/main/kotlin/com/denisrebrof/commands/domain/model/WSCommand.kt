@@ -30,4 +30,5 @@ enum class WSCommand(val id: Long) {
     SetUserName(21L),
 
     Rating(22L),
+    PlayerStats(23L),
 }

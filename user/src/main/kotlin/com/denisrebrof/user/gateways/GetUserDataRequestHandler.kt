@@ -2,6 +2,7 @@ package com.denisrebrof.user.gateways
 
 import com.denisrebrof.commands.domain.model.ResponseErrorCodes
 import com.denisrebrof.commands.domain.model.ResponseState
+import com.denisrebrof.commands.domain.model.UserNotFoundDefaultResponse
 import com.denisrebrof.user.domain.model.UserIdentity
 import com.denisrebrof.commands.domain.model.WSCommand
 import com.denisrebrof.user.domain.repositories.IUserRepository
@@ -20,12 +21,7 @@ class GetUserDataRequestHandler @Autowired constructor(
 
     private val wrongDataResponse = ResponseState.ErrorResponse(
         ResponseErrorCodes.Internal.code,
-        Exception("User not found!")
-    )
-
-    private val userNotFoundResponse = ResponseState.ErrorResponse(
-        ResponseErrorCodes.Internal.code,
-        Exception("User not found!")
+        Exception("Wrong data")
     )
 
     override fun handleMessage(userId: Long, data: Long): ResponseState {
@@ -35,7 +31,7 @@ class GetUserDataRequestHandler @Autowired constructor(
         val user = UserIdentity
             .fromUserId(data)
             .let(userRepository::find)
-            ?: return userNotFoundResponse
+            ?: return UserNotFoundDefaultResponse
 
         return UserDataResponse.fromUser(user)
             .let(Json::encodeToString)

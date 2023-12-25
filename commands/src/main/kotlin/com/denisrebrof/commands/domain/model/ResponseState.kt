@@ -7,3 +7,8 @@ sealed class ResponseState {
 
     companion object
 }
+
+val UserNotFoundDefaultResponse = ResponseState.ErrorResponse(
+    ResponseErrorCodes.UserNotFound.code,
+    Exception("User not found!")
+)

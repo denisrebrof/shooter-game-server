@@ -19,8 +19,11 @@ dependencies {
     implementation(libs.springContext)
     implementation(libs.springWeb)
 
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation(libs.hibernate)
+    implementation(libs.springJpa)
+
+    testImplementation(platform(libs.junit))
+    testImplementation(libs.junitJupiter)
 }
 
 tasks.test {
