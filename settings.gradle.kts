@@ -1,4 +1,5 @@
 rootProject.name = "spring-boot-test"
+
 include("games")
 include("core")
 include("utils")
@@ -11,6 +12,7 @@ include("commands")
 include("balance")
 include("lobby")
 include("simplestats")
+include("gameresources")
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {

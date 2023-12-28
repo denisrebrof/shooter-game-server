@@ -42,6 +42,8 @@ dependencies {
     implementation(project(":user"))
     implementation(project(":userdata"))
     implementation(project(":commands"))
+    implementation(project(":simplestats"))
+    implementation(project(":gameresources"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
