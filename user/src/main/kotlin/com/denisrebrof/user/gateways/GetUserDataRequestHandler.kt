@@ -1,14 +1,9 @@
 package com.denisrebrof.user.gateways
 
-import com.denisrebrof.commands.domain.model.ResponseErrorCodes
-import com.denisrebrof.commands.domain.model.ResponseState
-import com.denisrebrof.commands.domain.model.UserNotFoundDefaultResponse
+import com.denisrebrof.commands.domain.model.*
 import com.denisrebrof.user.domain.model.UserIdentity
-import com.denisrebrof.commands.domain.model.WSCommand
 import com.denisrebrof.user.domain.repositories.IUserRepository
 import com.denisrebrof.user.gateways.model.UserDataResponse
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -33,8 +28,8 @@ class GetUserDataRequestHandler @Autowired constructor(
             .let(userRepository::find)
             ?: return UserNotFoundDefaultResponse
 
-        return UserDataResponse.fromUser(user)
-            .let(Json::encodeToString)
-            .let(ResponseState::CreatedResponse)
+        return UserDataResponse
+            .fromUser(user)
+            .toResponse()
     }
 }

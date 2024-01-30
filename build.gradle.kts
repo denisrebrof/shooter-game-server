@@ -44,6 +44,8 @@ dependencies {
     implementation(project(":commands"))
     implementation(project(":simplestats"))
     implementation(project(":gameresources"))
+    implementation(project(":progression"))
+    implementation(project(":weapons"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")

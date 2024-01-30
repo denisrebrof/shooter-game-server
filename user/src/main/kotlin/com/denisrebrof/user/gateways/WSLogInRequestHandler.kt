@@ -3,6 +3,7 @@ package com.denisrebrof.user.gateways
 import com.denisrebrof.commands.domain.model.ResponseErrorCodes
 import com.denisrebrof.commands.domain.model.ResponseState
 import com.denisrebrof.commands.domain.model.WSCommand
+import com.denisrebrof.commands.domain.model.toResponse
 import com.denisrebrof.commands.gateways.WSSessionRequestHandler
 import com.denisrebrof.simplestats.domain.ISimpleStatsReceiver
 import com.denisrebrof.simplestats.domain.setPropertyString
@@ -12,7 +13,6 @@ import com.denisrebrof.user.domain.model.LoginResult
 import com.denisrebrof.user.gateways.WSLogInRequestHandler.AuthParamsData
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -50,8 +50,7 @@ class WSLogInRequestHandler @Autowired constructor(
             .login(params, sessionId)
             .also(::handleStatsCounter)
             .let(::createResponse)
-            .let(Json::encodeToString)
-            .let(ResponseState::CreatedResponse)
+            .toResponse()
     }
 
     private fun createResponse(result: LoginResult) = when (result) {

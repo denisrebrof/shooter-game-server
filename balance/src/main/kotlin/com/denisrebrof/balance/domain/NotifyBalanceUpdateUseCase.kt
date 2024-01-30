@@ -1,11 +1,9 @@
 package com.denisrebrof.balance.domain
 
-import com.denisrebrof.user.domain.SendUserNotificationUseCase
 import com.denisrebrof.balance.domain.model.BalanceResponse
-import com.denisrebrof.commands.domain.model.NotificationContent
+import com.denisrebrof.commands.domain.model.NotificationContent.Companion.toNotificationData
 import com.denisrebrof.commands.domain.model.WSCommand
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import com.denisrebrof.user.domain.SendUserNotificationUseCase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -18,8 +16,7 @@ class NotifyBalanceUpdateUseCase @Autowired constructor(
         val notification = userBalancesUseCase
             .getCurrencyBalances(userId)
             .let(BalanceResponse.Companion::fromCurrencies)
-            .let(Json::encodeToString)
-            .let(NotificationContent::Data)
+            .toNotificationData()
 
         sendUserNotificationUseCase.send(userId, WSCommand.BalanceState.id, notification)
     }

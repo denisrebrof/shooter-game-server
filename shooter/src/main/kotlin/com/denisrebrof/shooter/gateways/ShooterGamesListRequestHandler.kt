@@ -2,6 +2,7 @@ package com.denisrebrof.shooter.gateways
 
 import com.denisrebrof.commands.domain.model.ResponseState
 import com.denisrebrof.commands.domain.model.WSCommand
+import com.denisrebrof.commands.domain.model.toResponse
 import com.denisrebrof.matches.domain.model.Match
 import com.denisrebrof.matches.domain.services.MatchService
 import com.denisrebrof.matches.domain.services.MatchService.Companion.MAX_PARTICIPANTS
@@ -24,8 +25,7 @@ class ShooterGamesListRequestHandler @Autowired constructor(
         .getMatches()
         .mapNotNull(::getResponseItem)
         .let(::ShooterGamesListResponse)
-        .let(Json::encodeToString)
-        .let(ResponseState::CreatedResponse)
+        .toResponse()
 
     private fun getResponseItem(
         match: Match

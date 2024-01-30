@@ -1,6 +1,7 @@
 package com.denisrebrof.commands.domain.model
 
-import java.lang.Exception
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 data class Notification(
     val sessionId: String,
@@ -10,8 +11,12 @@ data class Notification(
 )
 
 sealed class NotificationContent {
-    data class Error(val errorCode: Long, val exception: Exception): NotificationContent()
-    data class Data(val text: String): NotificationContent()
+    data class Error(val errorCode: Long, val exception: Exception) : NotificationContent()
+    data class Data(val text: String) : NotificationContent()
 
-    companion object
+    companion object {
+        inline fun <reified T : Any> T.toNotificationData(): Data = Json
+            .encodeToString(this)
+            .let(NotificationContent::Data)
+    }
 }

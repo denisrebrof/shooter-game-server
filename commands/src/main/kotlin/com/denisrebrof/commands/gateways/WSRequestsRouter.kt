@@ -6,6 +6,7 @@ import com.denisrebrof.commands.domain.model.NotificationContent.Data
 import com.denisrebrof.commands.domain.model.NotificationContent.Error
 import com.denisrebrof.commands.domain.model.ResponseState
 import com.denisrebrof.commands.gateways.WSSessionRequestHandler.HandleRawMessageResult
+import org.apache.commons.logging.Log
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.TextMessage
@@ -14,9 +15,11 @@ import kotlin.reflect.safeCast
 
 @Service
 class WSRequestsRouter @Autowired constructor(
-    private val handlers: List<WSSessionRequestHandler<*>>,
+    handlers: List<WSSessionRequestHandler<*>>,
     private val notificationService: WSNotificationService
 ) {
+    private val handlersMap = handlers.associateBy(WSSessionRequestHandler<*>::id)
+
 
     fun sendRequest(
         sessionId: String,
@@ -33,9 +36,7 @@ class WSRequestsRouter @Autowired constructor(
             .toLongOrNull()
             ?: return MessageRoutingResult.InvalidMessage
 
-        val handler = handlers
-            .firstOrNull { it.id == commandIdCode }
-            ?: return MessageRoutingResult.HandlerNotFound
+        val handler = handlersMap[commandIdCode] ?: return MessageRoutingResult.HandlerNotFound
 
         val contentText = payloadSegments[1]
         val handleResult = handler.handleRawMessage(sessionId, contentText)

@@ -1,6 +1,7 @@
 package com.denisrebrof.shooter.domain.usecases
 
 import com.denisrebrof.commands.domain.model.NotificationContent
+import com.denisrebrof.commands.domain.model.NotificationContent.Companion.toNotificationData
 import com.denisrebrof.commands.domain.model.WSCommand
 import com.denisrebrof.games.Transform
 import com.denisrebrof.shooter.domain.model.*
@@ -18,29 +19,20 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
     fun notifyStateChanged(state: ShooterGameState) {
         val notification = GameStateResponse
             .convert(state)
-            .let(Json::encodeToString)
-            .let(NotificationContent::Data)
+            .toNotificationData()
 
         val sendToPlayer: (Long) -> Unit = { playerId -> sendState(playerId, notification) }
         state.playerIds.forEach(sendToPlayer)
     }
 
     fun notifyAction(action: ShooterGameActions, vararg playerIds: Long) {
-        val (command, notification) = when (action) {
-            is ShooterGameActions.Hit -> WSCommand.ActionHit to action
-                .let(Json::encodeToString)
-                .let(NotificationContent::Data)
-
-            is ShooterGameActions.Shoot -> WSCommand.ActionShoot to action
-                .let(Json::encodeToString)
-                .let(NotificationContent::Data)
-
-            is ShooterGameActions.JoinedStateChange -> WSCommand.ActionJoinedStateChange to action
-                .let(Json::encodeToString)
-                .let(NotificationContent::Data)
-
+        val command = when (action) {
+            is ShooterGameActions.Hit -> WSCommand.ActionHit
+            is ShooterGameActions.Shoot -> WSCommand.ActionShoot
+            is ShooterGameActions.JoinedStateChange -> WSCommand.ActionJoinedStateChange
             ShooterGameActions.LifecycleCompleted -> return
         }
+        val notification = action.toNotificationData()
         playerIds.forEach { playerId ->
             sendUserNotificationUseCase.send(playerId, command.id, notification)
         }

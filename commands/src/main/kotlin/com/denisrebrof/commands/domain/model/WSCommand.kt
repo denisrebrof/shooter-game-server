@@ -32,4 +32,6 @@ enum class WSCommand(val id: Long) {
     Rating(22L),
     PlayerStats(23L),
     ResVersion(24L),
+
+    LevelProgression(25L)
 }

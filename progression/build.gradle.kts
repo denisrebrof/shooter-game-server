@@ -1,9 +1,8 @@
 plugins {
-    id("java")
     kotlin("plugin.spring") version "1.7.22"
     kotlin("plugin.serialization") version "1.7.20"
     kotlin("kapt") version "1.8.21"
-    kotlin("jvm") version "1.7.22"
+    kotlin("jvm")
 }
 
 group = "com.denisrebrof"
@@ -12,22 +11,14 @@ repositories {
     mavenCentral()
 }
 
-sourceSets {
-    main {
-        java {
-            this.setSrcDirs(listOf<String>())
-        }
-    }
-}
-
 dependencies {
     implementation(project(":utils"))
-    implementation(libs.rxjava3)
-
-    implementation(libs.kotlinxSerialization)
+    implementation(project(":user"))
+    implementation(project(":commands"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(libs.kotlinxSerialization)
 
-    implementation(libs.springContext)
+    implementation(libs.rxjava3)
     implementation(libs.springBeans)
-    implementation(libs.springWebsocket)
+    implementation(libs.springContext)
 }
