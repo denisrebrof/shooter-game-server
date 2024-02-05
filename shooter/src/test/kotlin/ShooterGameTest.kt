@@ -18,6 +18,10 @@ class ShooterGameTest {
             prepareDelay = 1000L,
             gameDuration = 1000L,
             completeDelay = 1000L,
+            botSettings = ShooterGameSettings.BotSettings(
+                defaultWeaponId = 1L,
+                fillWithBotsToParticipantsCount = 5,
+            ),
         )
         val game = ShooterGame
             .create(playerIds, settings)
@@ -31,7 +35,39 @@ class ShooterGameTest {
             .blockingFirst()
         val finished = game.stateFlow.ofType(Finished::class.java).blockingFirst()
         assert(finished.finishedPlayers[1L]?.kills == 1)
+        assert(finished.finishedBots.keys.all { it < 0 })
+        assert(finished.finishedBots.size == 3)
         assert(finished.finishedPlayers[2L]?.death == 1)
-        assert(true)
+    }
+
+    @Test
+    fun testBots() {
+        val settings = ShooterGameSettings(
+            respawnDelay = 1000L,
+            prepareDelay = 1000L,
+            gameDuration = 1000L,
+            completeDelay = 1000L,
+            botSettings = ShooterGameSettings.BotSettings(
+                defaultWeaponId = 1L,
+                fillWithBotsToParticipantsCount = 5,
+            ),
+        )
+        val game = ShooterGame
+            .create(playerIds, settings)
+            .also(ShooterGame::start)
+        var playing = game.stateFlow.ofType(PlayingState::class.java).blockingFirst()
+        assert(playing.bots.size == 3)
+
+        game.removePlayers(1L)
+        playing = game.stateFlow.ofType(PlayingState::class.java).blockingFirst()
+        assert(playing.bots.size == 4)
+
+        game.addPlayers(1L, 3L)
+        playing = game.stateFlow.ofType(PlayingState::class.java).blockingFirst()
+        assert(playing.bots.size == 2)
+
+        val finished = game.stateFlow.ofType(Finished::class.java).blockingFirst()
+        assert(finished.finishedBots.keys.all { it < 0 })
+        assert(finished.finishedBots.size == 2)
     }
 }

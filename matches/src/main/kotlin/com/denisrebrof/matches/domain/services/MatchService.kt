@@ -17,7 +17,7 @@ class MatchService(
             return
 
         val time = Date().time
-        val match = Match(matchId, participants, time)
+        val match = Match(matchId, participants, MAX_PARTICIPANTS, time)
         matches[matchId] = match
         participants.forEach { participantIdToMatchId[it] = matchId }
         listeners.forEach { listener -> listener.onMatchStarted(match) }

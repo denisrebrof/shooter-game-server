@@ -54,8 +54,8 @@ class FillMatchesService @Autowired constructor(
     }
 
     private fun createMatch(participantIds: List<Long>) {
-        if (participantIds.size < 2)
-            return
+//        if (participantIds.size < 2)
+//            return
 
         participantIds.forEach(lobbyRepository::remove)
         participantIds.toSet().let(matchService::create)

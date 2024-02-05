@@ -19,10 +19,8 @@ open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private const
     private val stateProcessor = BehaviorProcessor.createDefault(initialState)
     private val actionProcessor = PublishProcessor.create<ACTION>()
 
-    private var currentState = initialState
-
     val state: STATE
-        get() = currentState
+        get() = stateProcessor.value!!
 
     val stateFlow: Flowable<STATE>
         get() = stateProcessor
@@ -43,10 +41,7 @@ open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private const
         assignState(state)
     }
 
-    private fun assignState(state: STATE) {
-        currentState = state
-        stateProcessor.onNext(state)
-    }
+    private fun assignState(state: STATE) = stateProcessor.onNext(state)
 
     protected fun send(action: ACTION) {
         if (isDisposed)

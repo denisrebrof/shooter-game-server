@@ -1,8 +1,11 @@
 package com.denisrebrof.shooter.domain.services
 
+import arrow.atomic.AtomicInt
+import arrow.atomic.value
 import com.denisrebrof.matches.domain.model.Match
 import com.denisrebrof.matches.domain.services.MatchGameService
 import com.denisrebrof.shooter.domain.ShooterGame
+import com.denisrebrof.shooter.domain.ShooterGameSettings
 import com.denisrebrof.shooter.domain.model.Finished
 import com.denisrebrof.shooter.domain.repositories.IShooterGamePlayerStatsRepository
 import com.denisrebrof.shooter.domain.usecases.CreateShooterGameUseCase
@@ -26,11 +29,22 @@ class ShooterGameService @Autowired constructor(
 
     private val clearFinishedGameDelayMs: Long = 1000L
 
-    private var createdGamesCount: Int = 0
-    private var finishedGamesCount: Int = 0
-    private var finishedNormallyCount: Int = 0
+    private var createdGamesCount: AtomicInt = AtomicInt(0)
+    private var finishedGamesCount: AtomicInt = AtomicInt(0)
+    private var finishedNormallyCount: AtomicInt = AtomicInt(0)
 
     private val saveStatsHandlers = CompositeDisposable()
+
+    private val defaultSettings = ShooterGameSettings(
+        respawnDelay = 3000L,
+        prepareDelay = 5000L,
+        gameDuration = 1000L * 60 * 5,
+        botSettings = ShooterGameSettings.BotSettings(
+            defaultWeaponId = 1L,
+            fillWithBotsToParticipantsCount = 0,
+        ),
+        completeDelay = 10000L
+    )
 
     init {
         statsReceiver.setPropertyString("Current Games Count") { gamesMap.size.toString() }
@@ -39,10 +53,10 @@ class ShooterGameService @Autowired constructor(
     }
 
     override fun onMatchFinished(match: Match) {
-        finishedGamesCount++
+        finishedGamesCount.value += 1
         get(match.id)?.state?.let { state ->
             if (state is Finished) {
-                finishedNormallyCount += 1
+                finishedNormallyCount.value += 1
                 savePlayerStats(state).let(saveStatsHandlers::add)
                 statsReceiver.addLog("Finished match for ${match.participants.size} players with id ${match.id}")
             } else {
@@ -52,14 +66,20 @@ class ShooterGameService @Autowired constructor(
         super.onMatchFinished(match)
     }
 
-    override fun createGame(match: Match): ShooterGame {
-        createdGamesCount += 1
+    override fun createGame(
+        match: Match
+    ): ShooterGame {
+        createdGamesCount.value += 1
         statsReceiver.addLog("Create match for ${match.participants.size} players with id ${match.id}")
-        return match
-            .participants
-            .toList()
-            .let(createGameUseCase::create)
-            .also { game -> createClearFinishedMatchHandler(match.id, game) }
+        val settings = defaultSettings.copy(
+            botSettings = defaultSettings.botSettings.copy(
+                fillWithBotsToParticipantsCount = match.minParticipants
+            )
+        )
+        val playerIds = match.participants.toList()
+        val game = createGameUseCase.create(playerIds, settings)
+        createClearFinishedMatchHandler(match.id, game)
+        return game
     }
 
     override fun destroy() = saveStatsHandlers.clear()

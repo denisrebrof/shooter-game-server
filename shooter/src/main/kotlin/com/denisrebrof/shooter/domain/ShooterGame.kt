@@ -1,5 +1,9 @@
 package com.denisrebrof.shooter.domain
 
+import arrow.optics.Every
+import arrow.optics.Optional
+import arrow.optics.copy
+import arrow.optics.dsl.every
 import arrow.optics.dsl.index
 import arrow.optics.typeclasses.Index
 import com.denisrebrof.games.MVIGameHandler
@@ -10,6 +14,8 @@ import com.denisrebrof.shooter.domain.model.PlayerTeam.Red
 import com.denisrebrof.utils.associateWithNotNull
 import com.denisrebrof.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.disposables.Disposable
 import java.util.concurrent.TimeUnit
 import com.denisrebrof.shooter.domain.model.ShooterGameActions as Action
 import com.denisrebrof.shooter.domain.model.ShooterGameIntents as Intent
@@ -33,8 +39,14 @@ class ShooterGame private constructor(
         .delay(settings.prepareDelay, TimeUnit.MILLISECONDS)
         .map(::createPlayingState)
         .doAfterSuccess(::setState)
-        .delay(settings.gameDuration, TimeUnit.MILLISECONDS)
-        .map { state }
+        .flatMap {
+            val playingStateHandler = createPlayingStateHandler()
+            return@flatMap Completable
+                .timer(settings.gameDuration, TimeUnit.MILLISECONDS)
+                .toSingle { state }
+                .doFinally { playingStateHandler.dispose() }
+                .toMaybe()
+        }
         .ofType(PlayingState::class.java)
         .map(::createFinishedState)
         .doAfterSuccess(::setState)
@@ -49,23 +61,29 @@ class ShooterGame private constructor(
         is Intent.Hit -> hit(intent)
     }
 
-    override fun addPlayers(vararg players: Long) = state.copyAndSet {
-        State.playingState.players transform { it + createJoinedPlayerStateMap(*players) }
-        State.preparing.pendingPlayers transform { it + createPendingPlayerStateMap(*players) }
+    override fun addPlayers(vararg players: Long) {
+        state.copyAndSet {
+            State.playingState.players transform { it + createJoinedPlayersStateMap(*players) }
+            State.preparing.pendingPlayers transform { it + createPendingPlayerStateMap(*players) }
+        }
+        refreshBotsState()
         players.map { Action.JoinedStateChange(it, true) }.forEach(::send)
     }
 
-    override fun removePlayers(vararg players: Long) = state.copyAndSet {
-        State.playingState.players transform { playerStateMap ->
-            val playerStateMutableMap = playerStateMap.toMutableMap()
-            players.forEach(playerStateMutableMap::remove)
-            return@transform playerStateMutableMap
+    override fun removePlayers(vararg players: Long) {
+        state.copyAndSet {
+            State.playingState.players transform { playerStateMap ->
+                val playerStateMutableMap = playerStateMap.toMutableMap()
+                players.forEach(playerStateMutableMap::remove)
+                return@transform playerStateMutableMap
+            }
+            State.preparing.pendingPlayers transform { playerStateMap ->
+                val playerStateMutableMap = playerStateMap.toMutableMap()
+                players.forEach(playerStateMutableMap::remove)
+                return@transform playerStateMutableMap
+            }
         }
-        State.preparing.pendingPlayers transform { playerStateMap ->
-            val playerStateMutableMap = playerStateMap.toMutableMap()
-            players.forEach(playerStateMutableMap::remove)
-            return@transform playerStateMutableMap
-        }
+        refreshBotsState()
         players.map { Action.JoinedStateChange(it, false) }.forEach(::send)
     }
 
@@ -120,11 +138,19 @@ class ShooterGame private constructor(
     private fun revivePlayer(playerId: Long) = state.copyAndSet {
         val playerState = getPlayerStateOptional(playerId)
         val playerTeam = playerState.data.team.getOrNull(state) ?: return@copyAndSet
-        getPlayerStateOptional(playerId).dynamicState transform transform@{ dynamicState ->
-            if (dynamicState !is Killed)
-                return@transform dynamicState
+        val dynamicState = playerState.dynamicState.getOrNull(state) ?: return@copyAndSet
 
-            return@transform createPlayerPlayingState(playerTeam)
+        if (dynamicState !is Killed)
+            return@copyAndSet
+
+        val revivedState = createPlayerPlayingState(playerTeam)
+        playerState.dynamicState set revivedState
+
+        getBotStateOptional(playerId) transform { state ->
+            state.copy(
+                routePointIndex = null,
+                routeIndex = settings.botSettings.findCloseRouteIndex(revivedState.transform, playerTeam)
+            )
         }
     }
 
@@ -135,9 +161,18 @@ class ShooterGame private constructor(
         }
     }
 
-    private fun getPlayerStateOptional(playerId: Long) = State
+    private fun getPlayerStateOptional(playerId: Long): Optional<State, ShooterPlayerState> = when {
+        playerId > 0 -> State
+            .playingState
+            .players
+            .index(Index.map(), playerId)
+
+        else -> getBotStateOptional(playerId).playerState
+    }
+
+    private fun getBotStateOptional(playerId: Long): Optional<State, ShooterBotState> = State
         .playingState
-        .players
+        .bots
         .index(Index.map(), playerId)
 
     private fun getPlayerPlayingStateOptional(playerId: Long) = getPlayerStateOptional(playerId)
@@ -148,6 +183,9 @@ class ShooterGame private constructor(
         finishedPlayers = playing
             .players
             .mapValues { (_, data) -> data.data },
+        finishedBots = playing
+            .bots
+            .mapValues { (_, data) -> data.playerState.data },
         winnerTeam = when {
             playing.redTeamKills > playing.blueTeamKills -> Red
             else -> Blue
@@ -156,19 +194,95 @@ class ShooterGame private constructor(
         blueTeamKills = playing.blueTeamKills
     )
 
-    private fun createPlayingState(preparing: Preparing) =
-        PlayingState(
-            players = preparing.pendingPlayers.mapValues { (_, data) ->
-                val dynamicState = createPlayerPlayingState(data.team)
-                ShooterPlayerState(data, 0L, dynamicState)
+    private fun createPlayingState(preparing: Preparing) = PlayingState(
+        players = preparing.pendingPlayers.mapValues { (_, data) ->
+            val dynamicState = createPlayerPlayingState(data.team)
+            ShooterPlayerState(data, 0L, dynamicState)
+        },
+        bots = createBotsStateMap(preparing.pendingPlayers.values).mapValues { (_, data) ->
+            val dynamicState = createPlayerPlayingState(data.team)
+            val playerState = ShooterPlayerState(data, settings.botSettings.defaultWeaponId, dynamicState)
+            val routeIndex = settings.botSettings.findCloseRouteIndex(dynamicState.transform, data.team)
+            return@mapValues ShooterBotState(playerState, routeIndex, 0)
+        }
+    )
+
+    private fun refreshBotsState() = state.copyAndSet {
+        val currentState = state
+        if (currentState !is PlayingState)
+            return@copyAndSet
+
+        val newBotsCount = settings.botSettings.fillWithBotsToParticipantsCount - currentState.players.size
+        var botsCountUpdate = newBotsCount - currentState.bots.size
+        if (botsCountUpdate == 0)
+            return@copyAndSet
+
+        val teamToPlayersCount = currentState
+            .players
+            .values
+            .groupBy { it.data.team }
+            .mapValues { (_, players) -> players.size }
+            .toMutableMap()
+
+        val newBots = currentState.bots.toMutableMap()
+        while (botsCountUpdate != 0) {
+            val addOrRemove = botsCountUpdate > 0
+            if (addOrRemove) {
+                val minTeam = teamToPlayersCount
+                    .minBy { (_, playersCount) -> playersCount }
+                    .key
+                val id = newBots.keys.minOrNull() ?: -1L
+                newBots[id - 1] = createJoinedBotState(minTeam) ?: continue
+                botsCountUpdate--
+            } else {
+                val maxTeam = teamToPlayersCount
+                    .minBy { (_, playersCount) -> playersCount }
+                    .key
+                val botToRemove = newBots
+                    .entries
+                    .firstOrNull { it.value.playerState.data.team == maxTeam }
+                    ?.key
+                    ?: newBots.entries.firstOrNull()?.key
+                botToRemove.let(newBots::remove)
+                botsCountUpdate++
             }
-        )
+        }
+        State.playingState.bots set newBots
+    }
 
     private fun createPendingPlayerStateMap(vararg players: Long): Map<Long, ShooterPlayerData> = players
         .toList()
         .associateWithNotNull { createPendingPlayerData() }
 
-    private fun createJoinedPlayerStateMap(
+    private fun createBotsStateMap(players: Collection<ShooterPlayerData>): Map<Long, ShooterPlayerData> {
+        val botsCount = settings.botSettings.fillWithBotsToParticipantsCount - players.size
+        if (botsCount <= 0)
+            return mapOf()
+
+        val teamToPlayersCount = players
+            .groupBy(ShooterPlayerData::team)
+            .mapValues { (_, players) -> players.size }
+            .toMutableMap()
+
+        PlayerTeam
+            .values()
+            .filterNot(teamToPlayersCount::containsKey)
+            .forEach { teamToPlayersCount[it] = 0 }
+
+        var counter = 1L
+        val botsMap = mutableMapOf<Long, ShooterPlayerData>()
+        repeat(botsCount) {
+            val minTeam = teamToPlayersCount
+                .minBy { (_, playersCount) -> playersCount }
+                .key
+
+            teamToPlayersCount[minTeam] = (teamToPlayersCount[minTeam] ?: 0) + 1
+            botsMap[counter++ * -1] = ShooterPlayerData(minTeam, 0, 0)
+        }
+        return botsMap
+    }
+
+    private fun createJoinedPlayersStateMap(
         vararg players: Long
     ): Map<Long, ShooterPlayerState> = players
         .toList()
@@ -178,8 +292,21 @@ class ShooterGame private constructor(
 
     private fun createJoinedPlayerState(): ShooterPlayerState? {
         val playerTeam = getJoinedPlayerTeam() ?: return null
-        val data = ShooterPlayerData(playerTeam)
-        val dynamicState = createPlayerPlayingState(playerTeam)
+        return createJoinedPlayerState(playerTeam)
+    }
+
+    private fun createJoinedBotState(team: PlayerTeam): ShooterBotState {
+        val data = ShooterPlayerData(team)
+        val dynamicState = createPlayerPlayingState(team)
+
+        val playerState = ShooterPlayerState(data, settings.botSettings.defaultWeaponId, dynamicState)
+        val routeIndex = settings.botSettings.findCloseRouteIndex(dynamicState.transform, data.team)
+        return ShooterBotState(playerState, routeIndex, 0)
+    }
+
+    private fun createJoinedPlayerState(team: PlayerTeam): ShooterPlayerState {
+        val data = ShooterPlayerData(team)
+        val dynamicState = createPlayerPlayingState(team)
         return ShooterPlayerState(data, 0L, dynamicState)
     }
 
@@ -196,8 +323,10 @@ class ShooterGame private constructor(
 
     private fun getJoinedPlayerTeam(): PlayerTeam? {
         val players = State.playingState.players.getOrNull(state)?.values ?: return null
-        val redTeamCount = players.count { player -> player.data.team == Red }
-        val blueTeamCount = players.size - redTeamCount
+        val bots = State.playingState.bots.getOrNull(state)?.values?.map(ShooterBotState::playerState) ?: listOf()
+        val participants = players + bots
+        val redTeamCount = participants.count { player -> player.data.team == Red }
+        val blueTeamCount = participants.size - redTeamCount
         return if (redTeamCount > blueTeamCount) Blue else Red
     }
 
@@ -208,6 +337,38 @@ class ShooterGame private constructor(
         crouching = false,
         aiming = false
     )
+
+    private fun createPlayingStateHandler(): Disposable = Flowable
+        .interval(settings.botSettings.botUpdateLoopDelayMs, TimeUnit.MILLISECONDS)
+        .onBackpressureDrop()
+        .subscribeDefault { updateBots() }
+
+    private fun updateBots() = state.copyAndSet {
+        State.playingState.bots.every(Every.map()) transform (::updateBot)
+    }
+
+    private fun updateBot(botState: ShooterBotState) = botState.copy {
+        val playing = ShooterBotState.playerState.dynamicState.playing.getOrNull(botState) ?: return@copy
+        val routes = when (botState.playerState.data.team) {
+            Red -> settings.botSettings.redTeamRoutes
+            else -> settings.botSettings.blueTeamRoutes
+        }
+        val currentRoute = botState.routeIndex?.let(routes::getOrNull) ?: return@copy
+        val currentPointIndex = botState.routePointIndex ?: if (currentRoute.isNotEmpty()) 0 else null ?: return@copy
+        val nextPointIndex = if (currentRoute.lastIndex > currentPointIndex) currentPointIndex + 1 else return@copy
+        val nextPoint = currentRoute[nextPointIndex]
+
+        val translation = settings.botSettings.botSpeed * settings.botSettings.botUpdateLoopDelayMs * 0.001f
+        val position = playing.transform.translateTo(nextPoint, translation)
+        ShooterBotState.playerState.dynamicState.playing.transform set position
+
+        val nextPointReached = nextPoint.isClose(position, settings.botSettings.botReachWaypointDist)
+        if (nextPointReached) {
+            if (currentRoute.lastIndex > nextPointIndex) {
+                ShooterBotState.routePointIndex set nextPointIndex
+            }
+        }
+    }
 
     companion object {
         fun create(

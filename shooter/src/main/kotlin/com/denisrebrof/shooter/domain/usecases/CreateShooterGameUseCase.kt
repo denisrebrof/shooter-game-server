@@ -3,6 +3,7 @@ package com.denisrebrof.shooter.domain.usecases
 import com.denisrebrof.shooter.domain.ShooterGame
 import com.denisrebrof.shooter.domain.ShooterGameSettings
 import com.denisrebrof.shooter.domain.model.playerIds
+import com.denisrebrof.shooter.domain.model.realPlayerIds
 import com.denisrebrof.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Flowable
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,15 +17,11 @@ class CreateShooterGameUseCase @Autowired constructor(
 
     private val stateSyncDelayMs = 200L
 
-    private val defaultSettings = ShooterGameSettings(
-        respawnDelay = 3000L,
-        prepareDelay = 5000L,
-        gameDuration = 1000L * 60 * 5,
-        completeDelay = 10000L
-    )
-
-    fun create(playerIds: List<Long>) = ShooterGame
-        .create(playerIds, defaultSettings)
+    fun create(
+        playerIds: List<Long>,
+        settings: ShooterGameSettings
+    ) = ShooterGame
+        .create(playerIds, settings)
         .also(::createStateHandler)
         .also(::createActionsHandler)
         .also(ShooterGame::start)
@@ -39,7 +36,7 @@ class CreateShooterGameUseCase @Autowired constructor(
     private fun createActionsHandler(game: ShooterGame) = game
         .actions
         .subscribeDefault { action ->
-            val receivers = game.state.playerIds.toLongArray()
+            val receivers = game.state.realPlayerIds.toLongArray()
             notificationsUseCase.notifyAction(action, *receivers)
         }.let(game::add)
 }

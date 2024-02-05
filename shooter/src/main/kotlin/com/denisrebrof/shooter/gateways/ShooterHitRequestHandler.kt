@@ -36,7 +36,7 @@ class ShooterHitRequestHandler @Autowired constructor(
             shooterId = playerId,
             weaponId = weaponId,
             hitPos = hitPos,
-            receiverId = if (receiverId >= 0) receiverId else null,
+            receiverId = receiverId,
             damage = damage
         )
     }

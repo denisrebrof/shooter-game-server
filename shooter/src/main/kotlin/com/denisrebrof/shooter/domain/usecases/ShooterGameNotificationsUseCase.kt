@@ -7,8 +7,6 @@ import com.denisrebrof.games.Transform
 import com.denisrebrof.shooter.domain.model.*
 import com.denisrebrof.user.domain.SendUserNotificationUseCase
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -22,7 +20,7 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
             .toNotificationData()
 
         val sendToPlayer: (Long) -> Unit = { playerId -> sendState(playerId, notification) }
-        state.playerIds.forEach(sendToPlayer)
+        state.realPlayerIds.forEach(sendToPlayer)
     }
 
     fun notifyAction(action: ShooterGameActions, vararg playerIds: Long) {
@@ -32,7 +30,13 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
             is ShooterGameActions.JoinedStateChange -> WSCommand.ActionJoinedStateChange
             ShooterGameActions.LifecycleCompleted -> return
         }
-        val notification = action.toNotificationData()
+        val notification = when (action) {
+            is ShooterGameActions.Hit -> action.toNotificationData()
+            is ShooterGameActions.JoinedStateChange -> action.toNotificationData()
+            is ShooterGameActions.Shoot -> action.toNotificationData()
+            ShooterGameActions.LifecycleCompleted -> return
+        }
+
         playerIds.forEach { playerId ->
             sendUserNotificationUseCase.send(playerId, command.id, notification)
         }
@@ -98,7 +102,7 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
                 PlayerDataResponse.fromDataOnly(id, data)
             }
 
-            is PlayingState -> players.map { (id, state) ->
+            is PlayingState -> players.plus(botStates).map { (id, state) ->
                 val playingState = ShooterPlayerState.dynamicState.playing.getOrNull(state)
                 val killedState = ShooterPlayerState.dynamicState.killed.getOrNull(state)
                 PlayerDataResponse(
@@ -116,7 +120,7 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
                 )
             }
 
-            is Finished -> finishedPlayers.map { (id, data) ->
+            is Finished -> finishedPlayers.plus(finishedBots).map { (id, data) ->
                 PlayerDataResponse.fromDataOnly(id, data)
             }
         }

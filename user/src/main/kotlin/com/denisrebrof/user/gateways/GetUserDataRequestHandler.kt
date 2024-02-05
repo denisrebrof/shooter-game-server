@@ -1,6 +1,9 @@
 package com.denisrebrof.user.gateways
 
-import com.denisrebrof.commands.domain.model.*
+import com.denisrebrof.commands.domain.model.ResponseState
+import com.denisrebrof.commands.domain.model.UserNotFoundDefaultResponse
+import com.denisrebrof.commands.domain.model.WSCommand
+import com.denisrebrof.commands.domain.model.toResponse
 import com.denisrebrof.user.domain.model.UserIdentity
 import com.denisrebrof.user.domain.repositories.IUserRepository
 import com.denisrebrof.user.gateways.model.UserDataResponse
@@ -14,14 +17,12 @@ class GetUserDataRequestHandler @Autowired constructor(
 
     override fun parseData(data: String): Long = data.toLongOrNull() ?: -1L
 
-    private val wrongDataResponse = ResponseState.ErrorResponse(
-        ResponseErrorCodes.Internal.code,
-        Exception("Wrong data")
-    )
-
     override fun handleMessage(userId: Long, data: Long): ResponseState {
         if (data < 0L)
-            return wrongDataResponse
+            return "Bot_"
+                .plus(-data)
+                .let(::UserDataResponse)
+                .toResponse()
 
         val user = UserIdentity
             .fromUserId(data)

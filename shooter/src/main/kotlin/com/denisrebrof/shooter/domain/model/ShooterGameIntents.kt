@@ -28,4 +28,9 @@ sealed class ShooterGameIntents {
         val pos: Transform,
         val verticalLookAngle: Float,
     ) : ShooterGameIntents()
+
+//    data class ApplyBotsVisibility(
+//        val botsHash: Long,
+//        val visibilityMask: Long,
+//    ) : ShooterGameIntents()
 }
