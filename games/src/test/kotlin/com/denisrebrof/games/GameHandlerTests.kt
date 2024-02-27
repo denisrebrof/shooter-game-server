@@ -1,6 +1,9 @@
 package com.denisrebrof.games
 
+import arrow.optics.copy
+import arrow.optics.dsl.index
 import arrow.optics.optics
+import arrow.optics.typeclasses.Index
 import com.denisrebrof.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
@@ -68,10 +71,10 @@ class GameHandlerTests {
                     .let(::setState)
 
             send(SampleGameAction.Fireworks)
-            return playingState.copyAndSet {
-//                SampleGameState.Playing.test.data.data transform { "$$it$" }
-//                SampleGameState.Playing.playerToScore.index(Index.map(), intent.playerId) transform { newScore }
-            }
+            return playingState.copy {
+                SampleGameState.Playing.test.data.data transform { "$$it$" }
+                SampleGameState.Playing.playerToScore.index(Index.map(), intent.playerId) transform { newScore }
+            }.let(::setState)
         }
     }
 

@@ -18,6 +18,15 @@ class UserProgressionRepositoryImpl @Autowired constructor(
         data.copy(level = level).let(userDataRepository::save)
     }
 
+    override fun getLastClaimedLevel(userId: Long) = userDataRepository
+        .findUserDataById(userId)
+        ?.lastClaimedLevel
+
+    override fun setLastClaimedLevel(userId: Long, level: Int) {
+        val data = userDataRepository.findUserDataById(userId) ?: return
+        data.copy(lastClaimedLevel = level).let(userDataRepository::save)
+    }
+
     override fun getXp(userId: Long): Int? = userDataRepository
         .findUserDataById(userId)
         ?.xp

@@ -8,6 +8,8 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.disposables.DisposableContainer
 import io.reactivex.rxjava3.processors.BehaviorProcessor
 import io.reactivex.rxjava3.processors.PublishProcessor
+import kotlin.reflect.KClass
+import kotlin.reflect.safeCast
 
 open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private constructor(
     initialState: STATE,
@@ -50,5 +52,44 @@ open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private const
         actionProcessor.onNext(action)
     }
 
-    protected fun STATE.copyAndSet(copy: Copy<STATE>.() -> Unit) = copy(copy).let(::setState)
+    protected fun <TYPED_STATE : STATE> getTypedState(stateType: KClass<TYPED_STATE>) = stateType.safeCast(state)
+
+    protected fun <TYPED_STATE : STATE> withState(
+        stateType: KClass<TYPED_STATE>,
+        scope: TYPED_STATE.() -> Unit
+    ) = stateType
+        .safeCast(state)
+        ?.let(scope)
+        ?: Unit
+
+    protected fun <TYPED_STATE : STATE> updateState(
+        stateType: KClass<TYPED_STATE>,
+        mutation: (TYPED_STATE) -> TYPED_STATE
+    ) = stateType
+        .safeCast(state)
+        ?.let(mutation)
+        ?.let(::setState)
+        ?: Unit
+
+    protected fun <TYPED_STATE : STATE> mutateState(
+        stateType: KClass<TYPED_STATE>,
+        mutate: TYPED_STATE.() -> TYPED_STATE
+    ) = stateType
+        .safeCast(state)
+        ?.mutate()
+        ?.let(::setState)
+        ?: Unit
+
+    protected fun <TYPED_STATE : STATE> updateStateCopy(
+        stateType: KClass<TYPED_STATE>,
+        copyFun: Copy<TYPED_STATE>.(TYPED_STATE) -> Unit
+    ) {
+        val current = stateType
+            .safeCast(state)
+            ?: return
+
+        current
+            .copy { copyFun(current) }
+            .let(::setState)
+    }
 }

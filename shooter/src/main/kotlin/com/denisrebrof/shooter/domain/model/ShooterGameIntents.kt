@@ -9,7 +9,7 @@ sealed class ShooterGameIntents {
         val weaponId: Long,
         val damage: Int,
         val hitPos: Transform,
-        val receiverId: Long?
+        val receiverId: Long
     ) : ShooterGameIntents()
 
     data class Shoot(
@@ -29,8 +29,8 @@ sealed class ShooterGameIntents {
         val verticalLookAngle: Float,
     ) : ShooterGameIntents()
 
-//    data class ApplyBotsVisibility(
-//        val botsHash: Long,
-//        val visibilityMask: Long,
-//    ) : ShooterGameIntents()
+    data class SubmitBotsVisibility(
+        val playersHash: Int,
+        val targets: Map<Long, Long>,
+    ) : ShooterGameIntents()
 }

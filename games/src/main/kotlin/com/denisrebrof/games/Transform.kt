@@ -1,7 +1,12 @@
 package com.denisrebrof.games
 
 import kotlinx.serialization.Serializable
+import kotlin.math.atan2
 import kotlin.math.sqrt
+
+private val invertedPi = 1f
+    .div(Math.PI)
+    .toFloat()
 
 @Serializable
 data class Transform(
@@ -38,6 +43,13 @@ data class Transform(
             z = target.z.minus(z).times(changeMul).plus(z),
             r = r
         )
+    }
+
+    fun lookAt(target: Transform): Transform {
+        val relativeX = target.x.minus(x)
+        val relativeZ = target.z.minus(z)
+        val rot = atan2(relativeX, relativeZ) * invertedPi * 180f
+        return copy(r = rot)
     }
 
     companion object {

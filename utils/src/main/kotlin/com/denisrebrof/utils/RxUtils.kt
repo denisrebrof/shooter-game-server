@@ -18,6 +18,10 @@ inline fun <reified T : Any> Single<T>.subscribeWithLogError(noinline consumer: 
     }
 }
 
+inline fun <reified T : Any> Single<T>.subscribeWithLogError(): Disposable {
+    return this.subscribe({ }) { handleThrowable(it) }
+}
+
 inline fun <reified T : Any> Flowable<T>.subscribeWithLogError(): Disposable {
     return this.subscribe({ }, { handleThrowable(it) })
 }

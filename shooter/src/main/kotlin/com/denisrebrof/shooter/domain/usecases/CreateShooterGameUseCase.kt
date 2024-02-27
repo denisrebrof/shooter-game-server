@@ -1,9 +1,8 @@
 package com.denisrebrof.shooter.domain.usecases
 
-import com.denisrebrof.shooter.domain.ShooterGame
-import com.denisrebrof.shooter.domain.ShooterGameSettings
+import com.denisrebrof.shooter.domain.game.ShooterGame
+import com.denisrebrof.shooter.domain.model.ShooterGameSettings
 import com.denisrebrof.shooter.domain.model.playerIds
-import com.denisrebrof.shooter.domain.model.realPlayerIds
 import com.denisrebrof.utils.subscribeDefault
 import io.reactivex.rxjava3.core.Flowable
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +35,7 @@ class CreateShooterGameUseCase @Autowired constructor(
     private fun createActionsHandler(game: ShooterGame) = game
         .actions
         .subscribeDefault { action ->
-            val receivers = game.state.realPlayerIds.toLongArray()
+            val receivers = game.state.playerIds.toLongArray()
             notificationsUseCase.notifyAction(action, *receivers)
         }.let(game::add)
 }

@@ -20,7 +20,10 @@ class ShooterShootRequestHandler @Autowired constructor(
     override fun parseData(data: String): IntentShootData = Json.decodeFromString(data)
 
     override fun handleMessage(userId: Long, data: IntentShootData): ResponseState = with(data) {
-        val game = getGameUseCase.get(userId) ?: return@with ResponseState.NoResponse
+        val game = getGameUseCase
+            .get(userId)
+            ?: return@with ResponseState.NoResponse
+
         data.toIntent(userId).let(game::submit)
         return@with ResponseState.NoResponse
     }

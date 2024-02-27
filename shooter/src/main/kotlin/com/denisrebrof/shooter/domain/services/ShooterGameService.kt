@@ -4,9 +4,10 @@ import arrow.atomic.AtomicInt
 import arrow.atomic.value
 import com.denisrebrof.matches.domain.model.Match
 import com.denisrebrof.matches.domain.services.MatchGameService
-import com.denisrebrof.shooter.domain.ShooterGame
-import com.denisrebrof.shooter.domain.ShooterGameSettings
+import com.denisrebrof.progression.domain.AddXpUseCase
+import com.denisrebrof.shooter.domain.game.ShooterGame
 import com.denisrebrof.shooter.domain.model.Finished
+import com.denisrebrof.shooter.domain.model.ShooterGameSettings
 import com.denisrebrof.shooter.domain.repositories.IShooterGamePlayerStatsRepository
 import com.denisrebrof.shooter.domain.usecases.CreateShooterGameUseCase
 import com.denisrebrof.simplestats.domain.ISimpleStatsReceiver
@@ -24,6 +25,7 @@ import com.denisrebrof.shooter.domain.model.ShooterGameActions as Actions
 class ShooterGameService @Autowired constructor(
     private val createGameUseCase: CreateShooterGameUseCase,
     private val playerStatsRepository: IShooterGamePlayerStatsRepository,
+    private val addXpUseCase: AddXpUseCase,
     private val statsReceiver: ISimpleStatsReceiver
 ) : MatchGameService<ShooterGame>(), DisposableBean {
 
@@ -36,12 +38,13 @@ class ShooterGameService @Autowired constructor(
     private val saveStatsHandlers = CompositeDisposable()
 
     private val defaultSettings = ShooterGameSettings(
+        defaultHp = 100,
         respawnDelay = 3000L,
         prepareDelay = 5000L,
-        gameDuration = 1000L * 60 * 5,
+        gameDuration = 1000L * 60 * 3,
         botSettings = ShooterGameSettings.BotSettings(
             defaultWeaponId = 1L,
-            fillWithBotsToParticipantsCount = 0,
+            fillWithBotsToTeamSize = 0,
         ),
         completeDelay = 10000L
     )
@@ -53,8 +56,8 @@ class ShooterGameService @Autowired constructor(
     }
 
     override fun onMatchFinished(match: Match) {
-        finishedGamesCount.value += 1
         get(match.id)?.state?.let { state ->
+            finishedGamesCount.value += 1
             if (state is Finished) {
                 finishedNormallyCount.value += 1
                 savePlayerStats(state).let(saveStatsHandlers::add)
@@ -73,7 +76,7 @@ class ShooterGameService @Autowired constructor(
         statsReceiver.addLog("Create match for ${match.participants.size} players with id ${match.id}")
         val settings = defaultSettings.copy(
             botSettings = defaultSettings.botSettings.copy(
-                fillWithBotsToParticipantsCount = match.minParticipants
+                fillWithBotsToTeamSize = match.minParticipants / 2
             )
         )
         val playerIds = match.participants.toList()
@@ -87,9 +90,14 @@ class ShooterGameService @Autowired constructor(
     private fun savePlayerStats(state: Finished) = Flowable
         .fromIterable(state.finishedPlayers.entries)
         .subscribeDefault { (id, data) ->
+            //TODO: Move out to separate use case
+            val won = data.team == state.winnerTeam
+            val winMul = if (won) 2 else 1
+            val xpAmount = data.kills.times(5).plus(10).times(winMul)
+            addXpUseCase.addXp(id, xpAmount)
             playerStatsRepository.handleMatchResults(
                 userId = id,
-                won = data.team == state.winnerTeam,
+                won = won,
                 kills = data.kills,
                 death = data.death
             )

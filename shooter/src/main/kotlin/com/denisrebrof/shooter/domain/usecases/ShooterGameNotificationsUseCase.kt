@@ -1,5 +1,7 @@
 package com.denisrebrof.shooter.domain.usecases
 
+import arrow.optics.dsl.index
+import arrow.optics.typeclasses.Index
 import com.denisrebrof.commands.domain.model.NotificationContent
 import com.denisrebrof.commands.domain.model.NotificationContent.Companion.toNotificationData
 import com.denisrebrof.commands.domain.model.WSCommand
@@ -20,7 +22,7 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
             .toNotificationData()
 
         val sendToPlayer: (Long) -> Unit = { playerId -> sendState(playerId, notification) }
-        state.realPlayerIds.forEach(sendToPlayer)
+        state.playerIds.forEach(sendToPlayer)
     }
 
     fun notifyAction(action: ShooterGameActions, vararg playerIds: Long) {
@@ -47,21 +49,38 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
         content: NotificationContent.Data
     ) = sendUserNotificationUseCase.send(userId, WSCommand.GameState.id, content)
 
-    private fun GameStateResponse.Companion.convert(state: ShooterGameState) = GameStateResponse(
-        typeCode = state.responseType.code,
-        playerData = state.playersData,
-        winnerTeamId = ShooterGameState.finished.winnerTeam.getOrNull(state)?.id ?: 0,
-        redTeamKills = ShooterGameState.playingState.redTeamKills.getOrNull(state)
-            ?: ShooterGameState.finished.redTeamKills.getOrNull(state)
-            ?: 0,
-        blueTeamKills = ShooterGameState.playingState.blueTeamKills.getOrNull(state)
-            ?: ShooterGameState.finished.blueTeamKills.getOrNull(state)
-            ?: 0
-    )
+    private fun GameStateResponse.Companion.convert(state: ShooterGameState): GameStateResponse {
+        val getKills: (PlayerTeam) -> Int = kills@{
+            val playingKills = ShooterGameState
+                .playingState
+                .teamData
+                .index(Index.map(), it)
+                .kills
+
+            val finishedKills = ShooterGameState
+                .finished
+                .teamKills
+                .index(Index.map(), it)
+
+            return@kills playingKills.getOrNull(state)
+                ?: finishedKills.getOrNull(state)
+                ?: 0
+        }
+
+        return GameStateResponse(
+            typeCode = state.responseType.code,
+            playersHash = state.participantIds.hashCode(),
+            playerData = state.playersData,
+            winnerTeamId = ShooterGameState.finished.winnerTeam.getOrNull(state)?.id ?: 0,
+            redTeamKills = getKills(PlayerTeam.Red),
+            blueTeamKills = getKills(PlayerTeam.Blue)
+        )
+    }
 
     @Serializable
     private data class GameStateResponse(
         val typeCode: Long,
+        val playersHash: Int,
         val playerData: List<PlayerDataResponse>,
         val winnerTeamId: Int,
         val redTeamKills: Int,

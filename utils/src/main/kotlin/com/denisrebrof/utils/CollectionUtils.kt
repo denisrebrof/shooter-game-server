@@ -13,7 +13,7 @@ fun <T, K : Any, V : Any> Iterable<T>.associateByNotNull(
 
 fun <T : Any, V : Any> Iterable<T>.associateWithNotNull(
     valueTransform: (T) -> V?,
-): Map<T, V> = associateByNotNull({key -> key}, valueTransform)
+): Map<T, V> = associateByNotNull({ key -> key }, valueTransform)
 
 fun <T> Iterable<T>.chunkedFixed(size: Int): List<List<T>> = chunked(size).filter { it.size == size }
 
@@ -29,3 +29,6 @@ public fun <T> Iterator<T>.another(n: Int): List<T> {
     }
     return list
 }
+
+fun <A, B, R> Pair<A, B>.spread(f: (A, B) -> R) = f(first, second)
+fun <A, B, R> Map.Entry<A, B>.spread(f: (A, B) -> R) = f(key, value)

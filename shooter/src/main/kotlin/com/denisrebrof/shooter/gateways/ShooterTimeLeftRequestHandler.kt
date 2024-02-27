@@ -3,7 +3,7 @@ package com.denisrebrof.shooter.gateways
 import com.denisrebrof.commands.domain.model.ResponseState
 import com.denisrebrof.commands.domain.model.WSCommand
 import com.denisrebrof.commands.domain.model.fromLong
-import com.denisrebrof.shooter.domain.ShooterGame
+import com.denisrebrof.shooter.domain.game.ShooterGame
 import com.denisrebrof.shooter.domain.model.Finished
 import com.denisrebrof.shooter.domain.model.PlayingState
 import com.denisrebrof.shooter.domain.model.Preparing

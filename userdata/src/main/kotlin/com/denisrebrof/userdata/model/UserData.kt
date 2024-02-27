@@ -20,6 +20,7 @@ data class UserData(
     val kills: Int = 0,
     val death: Int = 0,
     val level: Int = 1,
+    val lastClaimedLevel: Int = 1,
     val xp: Int = 0,
     val gamesPlayed: Int = 0,
     val gamesWon: Int = 0,

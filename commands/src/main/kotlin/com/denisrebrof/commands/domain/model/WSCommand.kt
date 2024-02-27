@@ -33,5 +33,9 @@ enum class WSCommand(val id: Long) {
     PlayerStats(23L),
     ResVersion(24L),
 
-    LevelProgression(25L)
+    LevelProgression(25L),
+
+    IntentSubmitVisibility(26L),
+    UnclaimedLevelRewardsData(27L),
+    ClaimLevelRewards(28L)
 }

@@ -20,10 +20,10 @@ sealed interface ShooterDynamicState {
 @optics
 data class Playing(
     val hp: Int,
-    val crouching: Boolean,
-    val aiming: Boolean,
     val transform: Transform,
-    val verticalLookAngle: Float
+    val verticalLookAngle: Float = 0f,
+    val crouching: Boolean = false,
+    val aiming: Boolean = false,
 ) : ShooterDynamicState {
     companion object
 }
