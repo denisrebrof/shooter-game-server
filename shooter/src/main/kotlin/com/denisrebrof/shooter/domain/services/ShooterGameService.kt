@@ -41,12 +41,12 @@ class ShooterGameService @Autowired constructor(
         defaultHp = 100,
         respawnDelay = 3000L,
         prepareDelay = 5000L,
-        gameDuration = 1000L * 60 * 3,
+        gameDuration = 1000L * 1000,
         botSettings = ShooterGameSettings.BotSettings(
             defaultWeaponId = 1L,
             fillWithBotsToTeamSize = 0,
         ),
-        completeDelay = 10000L
+        completeDelay = 5000L
     )
 
     init {

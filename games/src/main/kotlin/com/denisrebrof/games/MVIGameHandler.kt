@@ -36,14 +36,18 @@ open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private const
 
     protected open fun onIntentReceived(intent: INTENT) = Unit
 
-    protected fun setState(state: STATE) {
+    private val stateUpdateLock = Any()
+
+    protected fun setState(state: STATE) = synchronized(stateUpdateLock) {
         if (isDisposed)
             return
 
         assignState(state)
     }
 
-    private fun assignState(state: STATE) = stateProcessor.onNext(state)
+    private fun assignState(state: STATE) {
+        stateProcessor.onNext(state)
+    }
 
     protected fun send(action: ACTION) {
         if (isDisposed)
@@ -57,33 +61,39 @@ open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private const
     protected fun <TYPED_STATE : STATE> withState(
         stateType: KClass<TYPED_STATE>,
         scope: TYPED_STATE.() -> Unit
-    ) = stateType
-        .safeCast(state)
-        ?.let(scope)
-        ?: Unit
+    ) = synchronized(stateUpdateLock) {
+        stateType
+            .safeCast(state)
+            ?.let(scope)
+            ?: Unit
+    }
 
     protected fun <TYPED_STATE : STATE> updateState(
         stateType: KClass<TYPED_STATE>,
         mutation: (TYPED_STATE) -> TYPED_STATE
-    ) = stateType
-        .safeCast(state)
-        ?.let(mutation)
-        ?.let(::setState)
-        ?: Unit
+    ) = synchronized(stateUpdateLock) {
+        stateType
+            .safeCast(state)
+            ?.let(mutation)
+            ?.let(::setState)
+            ?: Unit
+    }
 
     protected fun <TYPED_STATE : STATE> mutateState(
         stateType: KClass<TYPED_STATE>,
         mutate: TYPED_STATE.() -> TYPED_STATE
-    ) = stateType
-        .safeCast(state)
-        ?.mutate()
-        ?.let(::setState)
-        ?: Unit
+    ) = synchronized(stateUpdateLock) {
+        stateType
+            .safeCast(state)
+            ?.mutate()
+            ?.let(::setState)
+            ?: Unit
+    }
 
     protected fun <TYPED_STATE : STATE> updateStateCopy(
         stateType: KClass<TYPED_STATE>,
         copyFun: Copy<TYPED_STATE>.(TYPED_STATE) -> Unit
-    ) {
+    ) = synchronized(stateUpdateLock) {
         val current = stateType
             .safeCast(state)
             ?: return
