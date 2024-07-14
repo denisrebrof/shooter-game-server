@@ -12,3 +12,8 @@ val UserNotFoundDefaultResponse = ResponseState.ErrorResponse(
     ResponseErrorCodes.UserNotFound.code,
     Exception("User not found!")
 )
+
+val InternalErrorDefaultResponse = ResponseState.ErrorResponse(
+    ResponseErrorCodes.Internal.code,
+    Exception("Internal server error")
+)

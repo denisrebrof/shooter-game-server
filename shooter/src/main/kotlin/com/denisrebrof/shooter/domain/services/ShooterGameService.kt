@@ -8,7 +8,10 @@ import com.denisrebrof.progression.domain.AddXpUseCase
 import com.denisrebrof.shooter.domain.game.ShooterGame
 import com.denisrebrof.shooter.domain.model.Finished
 import com.denisrebrof.shooter.domain.model.ShooterGameSettings
+import com.denisrebrof.shooter.domain.repositories.DefaultMapSettings
+import com.denisrebrof.shooter.domain.repositories.DesertMapSettings
 import com.denisrebrof.shooter.domain.repositories.IShooterGamePlayerStatsRepository
+import com.denisrebrof.shooter.domain.repositories.TundraMapSettings
 import com.denisrebrof.shooter.domain.usecases.CreateShooterGameUseCase
 import com.denisrebrof.simplestats.domain.ISimpleStatsReceiver
 import com.denisrebrof.simplestats.domain.setPropertyString
@@ -41,7 +44,8 @@ class ShooterGameService @Autowired constructor(
         defaultHp = 100,
         respawnDelay = 3000L,
         prepareDelay = 5000L,
-        gameDuration = 1000L * 1000,
+        gameDuration = 1000L * 600,
+        mapSettings = DefaultMapSettings,
         botSettings = ShooterGameSettings.BotSettings(
             defaultWeaponId = 1L,
             fillWithBotsToTeamSize = 0,
@@ -74,9 +78,17 @@ class ShooterGameService @Autowired constructor(
     ): ShooterGame {
         createdGamesCount.value += 1
         statsReceiver.addLog("Create match for ${match.participants.size} players with id ${match.id}")
+        val mapSettings = when(match.mapId) {
+            0 -> DefaultMapSettings
+            1 -> TundraMapSettings
+            2 -> DesertMapSettings
+            else -> DefaultMapSettings //TODO
+        }
         val settings = defaultSettings.copy(
+            mapSettings = mapSettings,
             botSettings = defaultSettings.botSettings.copy(
                 fillWithBotsToTeamSize = match.minParticipants / 2
+//                fillWithBotsToTeamSize = 0
             )
         )
         val playerIds = match.participants.toList()

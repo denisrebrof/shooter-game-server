@@ -31,8 +31,8 @@ class ShooterGameTest {
             .stateFlow
             .ofType(PlayingState::class.java)
             .delay(100L, TimeUnit.MILLISECONDS)
-            .map { ShooterGameIntents.Hit(1L, 1L, 120, Transform(0f, 0f, 0f, 0f), 2L) }
-            .doOnNext { game.submit(it) }
+            .map { ShooterGameIntents.Hit(1L, 1L, 120) }
+            .doOnNext(game::submit)
             .blockingFirst()
         val finished = game.stateFlow.ofType(Finished::class.java).blockingFirst()
         assert(finished.finishedPlayers[1L]?.kills == 1)

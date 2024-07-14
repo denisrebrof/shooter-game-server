@@ -1,5 +1,22 @@
 [
-  { "xpToReach": 10 },
   { "xpToReach": 20 },
-  { "xpToReach": 30 }
+  { "xpToReach": 40 },
+  { "xpToReach": 60 },
+  { "xpToReach": 80 },
+  { "xpToReach": 100 },
+  { "xpToReach": 120 },
+  { "xpToReach": 140 },
+  { "xpToReach": 160 },
+  { "xpToReach": 170 },
+  { "xpToReach": 180 },
+  { "xpToReach": 190 },
+  { "xpToReach": 200 },
+  { "xpToReach": 210 },
+  { "xpToReach": 220 },
+  { "xpToReach": 230 },
+  { "xpToReach": 240 },
+  { "xpToReach": 250 },
+  { "xpToReach": 260 },
+  { "xpToReach": 270 },
+  { "xpToReach": 280 }
 ]

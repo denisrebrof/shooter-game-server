@@ -4,6 +4,7 @@ import arrow.optics.Optional
 import arrow.optics.dsl.index
 import arrow.optics.optics
 import arrow.optics.typeclasses.Index
+import com.denisrebrof.games.Transform
 
 @optics
 sealed interface ShooterGameState {
@@ -51,10 +52,25 @@ data class PlayingState(
 
 @optics
 data class TeamPlayingData(
+    val flagPos: Transform,
     val lastSpawnIndex: Int,
+    val flagStateId: Long = FlagIdleStateId,
     val kills: Int = 0,
+    val flagsTaken: Int = 0,
 ) {
-    companion object
+    val flagPlayerId
+        get() = when {
+            flagStateId in arrayOf(FlagIdleStateId, FlagDroppedStateId) -> null
+            else -> flagStateId
+        }
+
+    val flagDropped
+        get() = flagStateId == FlagDroppedStateId
+
+    companion object {
+        const val FlagIdleStateId = -999L
+        const val FlagDroppedStateId = -998L
+    }
 }
 
 @optics
@@ -62,8 +78,16 @@ data class Finished(
     val finishedPlayers: Map<Long, ShooterPlayerData>,
     val finishedBots: Map<Long, ShooterPlayerData>,
     val winnerTeam: PlayerTeam,
-    val teamKills: Map<PlayerTeam, Int>,
+    val teamData: Map<PlayerTeam, FinishedTeamData>,
 ) : ShooterGameState {
+    companion object
+}
+
+@optics
+data class FinishedTeamData(
+    val kills: Int,
+    val flagsTaken: Int
+) {
     companion object
 }
 

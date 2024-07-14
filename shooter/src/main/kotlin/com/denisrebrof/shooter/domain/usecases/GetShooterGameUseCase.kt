@@ -11,7 +11,7 @@ class GetShooterGameUseCase @Autowired constructor(
     private val matchService: MatchService
 ) {
     fun get(userId: Long) = matchService
-        .getByUserId(userId)
+        .getMatchIdByUserId(userId)
         ?.let(service::get)
 
     fun getAll() = matchService

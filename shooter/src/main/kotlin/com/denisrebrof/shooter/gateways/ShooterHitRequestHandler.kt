@@ -34,8 +34,6 @@ class ShooterHitRequestHandler @Autowired constructor(
     ) {
         fun toIntent(playerId: Long) = ShooterGameIntents.Hit(
             shooterId = playerId,
-            weaponId = weaponId,
-            hitPos = hitPos,
             receiverId = receiverId,
             damage = damage
         )

@@ -28,7 +28,10 @@ class StateTransitionsDelegate(
                 getNextSpawn = this::nextSpawn
             ),
             teamData = lastSpawnIndices
-                .mapValues { (_, lastSpawnIndex) -> TeamPlayingData(lastSpawnIndex) }
+                .mapValues { (team, lastSpawnIndex) ->
+                    val defaultFlagPos = settings.getDefaultFlagPos(team)
+                    TeamPlayingData(defaultFlagPos, lastSpawnIndex)
+                }
         )
     }
 
@@ -41,11 +44,11 @@ class StateTransitionsDelegate(
             .mapValues { (_, data) -> data.playerState.data },
         winnerTeam = playing
             .teamData
-            .maxBy { (_, data) -> data.kills }
+            .maxBy { (_, data) -> data.flagsTaken + data.kills * 0.0001f }
             .key,
-        teamKills = playing
+        teamData = playing
             .teamData
-            .mapValues { (_, data) -> data.kills }
+            .mapValues { (_, data) -> FinishedTeamData(data.kills, data.flagsTaken) }
     )
 
     private fun createPlayerPlayingState(pos: Transform) = Playing(
@@ -53,6 +56,7 @@ class StateTransitionsDelegate(
         transform = pos,
         verticalLookAngle = 0f,
         crouching = false,
-        aiming = false
+        jumping = false,
+        aiming = false,
     )
 }

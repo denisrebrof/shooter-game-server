@@ -1,10 +1,8 @@
 package com.denisrebrof.shooter.domain.game.delegates
 
 import com.denisrebrof.shooter.domain.game.iterators.createSpawnIterator
-import com.denisrebrof.shooter.domain.model.PlayerTeam
-import com.denisrebrof.shooter.domain.model.PlayingState
-import com.denisrebrof.shooter.domain.model.Preparing
-import com.denisrebrof.shooter.domain.model.ShooterGameSettings
+import com.denisrebrof.shooter.domain.model.*
+import com.denisrebrof.shooter.domain.model.TeamPlayingData.Companion.FlagIdleStateId
 
 class RemovePlayersDelegate(
     private val settings: ShooterGameSettings,
@@ -14,10 +12,11 @@ class RemovePlayersDelegate(
         current: PlayingState,
         vararg playerIds: Long
     ): PlayingState = with(current) {
-        val newPlayers = playerIds.toSet().let(current.players::minus)
+        val playerIdsSet = playerIds.toSet()
+        val leftPlayers = playerIdsSet.let(current.players::minus)
 
         val getPlayersCount: (PlayerTeam) -> Int = {
-            newPlayers
+            leftPlayers
                 .filterValues { state -> state.data.team == it }
                 .size
         }
@@ -29,9 +28,36 @@ class RemovePlayersDelegate(
             getPlayersCount = getPlayersCount,
             getNextSpawn = spawnIterator::nextSpawn
         )
-        return@with current.copy(
-            players = newPlayers,
-            bots = newBots
+
+        val blueTeamPlayerId = teamData[PlayerTeam.Blue]?.flagPlayerId
+        val redTeamPlayerId = teamData[PlayerTeam.Red]?.flagPlayerId
+
+        val returnFlagsMap = mapOf(
+            PlayerTeam.Blue to when {
+                blueTeamPlayerId == null -> false
+                else -> playerIdsSet.any(blueTeamPlayerId::equals)
+            },
+            PlayerTeam.Red to when {
+                redTeamPlayerId == null -> false
+                else -> playerIdsSet.any(redTeamPlayerId::equals)
+            }
+        )
+
+        val newTeamData = teamData.mapValues { (team, data) ->
+            val needReturnFlag = returnFlagsMap.getOrDefault(team, false)
+            if (!needReturnFlag)
+                return@mapValues data
+
+            return@mapValues data.copy(
+                flagStateId = FlagIdleStateId,
+                flagPos = settings.getDefaultFlagPos(team)
+            )
+        }
+
+        return@with copy(
+            players = leftPlayers,
+            bots = newBots,
+            teamData = newTeamData
         )
     }
 

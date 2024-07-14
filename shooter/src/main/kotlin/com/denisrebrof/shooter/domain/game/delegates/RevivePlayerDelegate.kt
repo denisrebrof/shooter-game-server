@@ -38,7 +38,7 @@ class RevivePlayerDelegate(
 
         inside(PlayingState.getBotStateOptional(playerId)) {
             ShooterBotState.nullableRoutePointIndex set null
-            ShooterBotState.nullableRouteIndex set settings.botSettings.findCloseRouteIndex(spawnPos, playerTeam)
+            ShooterBotState.nullableRouteIndex set settings.mapSettings.findCloseRouteIndex(spawnPos, playerTeam)
         }
     }
 }

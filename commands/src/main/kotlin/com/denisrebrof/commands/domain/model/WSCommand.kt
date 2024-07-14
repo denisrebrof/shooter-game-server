@@ -36,6 +36,15 @@ enum class WSCommand(val id: Long) {
     LevelProgression(25L),
 
     IntentSubmitVisibility(26L),
+
     UnclaimedLevelRewardsData(27L),
-    ClaimLevelRewards(28L)
+    ClaimLevelRewards(28L),
+
+    WeaponStates(29L),
+    LoadoutState(30L),
+    PurchaseWeapon(31L),
+    SetWeaponSlot(32L),
+
+    IntentHitByBot(33L),
+    IntentFlagAction(34L),
 }

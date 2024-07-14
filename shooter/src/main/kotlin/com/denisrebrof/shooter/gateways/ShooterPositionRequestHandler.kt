@@ -22,13 +22,15 @@ class ShooterPositionRequestHandler @Autowired constructor(
 
     override fun handleMessage(userId: Long, data: SubmitPosRequest): ResponseState = with(data) {
         val game = getGameUseCase.get(userId) ?: return@with ResponseState.NoResponse
-        ShooterGameIntents.UpdatePos(userId, pos, verticalLookAngle).let(game::submit)
+        ShooterGameIntents.UpdatePos(userId, pos, verticalLookAngle, crouching, jumping).let(game::submit)
         return@with ResponseState.NoResponse
     }
 
     @Serializable
     data class SubmitPosRequest(
         val pos: Transform,
-        val verticalLookAngle: Float
+        val verticalLookAngle: Float,
+        val crouching: Boolean,
+        val jumping: Boolean,
     )
 }

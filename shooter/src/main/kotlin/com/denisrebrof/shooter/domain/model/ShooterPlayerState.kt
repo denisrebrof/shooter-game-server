@@ -23,6 +23,7 @@ data class Playing(
     val transform: Transform,
     val verticalLookAngle: Float = 0f,
     val crouching: Boolean = false,
+    val jumping: Boolean = false,
     val aiming: Boolean = false,
 ) : ShooterDynamicState {
     companion object

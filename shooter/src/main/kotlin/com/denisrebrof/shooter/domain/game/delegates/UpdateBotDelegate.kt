@@ -37,9 +37,11 @@ class UpdateBotDelegate(
     }
 
     private fun updateTargets(botIds: Set<Long>) {
-        val newTargets = botIds.associateWith(::createTarget)
-        targets = newTargets
-        submittedTargets.clear()
+        synchronized(submittedTargets) {
+            val newTargets = botIds.associateWith(::createTarget)
+            targets = newTargets
+            submittedTargets.clear()
+        }
     }
 
     fun updateBots(state: PlayingState): UpdateBotsResult {
@@ -57,7 +59,8 @@ class UpdateBotDelegate(
                 ?.let(Playing::class::safeCast)
                 ?: return@mapValues updateBot(bot, null)
 
-            val targetPos = target.transform
+            //TODO: Move offset to settings
+            val targetPos = target.transform.copy(y = target.transform.y + 1.2f)
             val weaponId = bot.playerState.selectedWeaponId
             ShooterGameActions
                 .Shoot(botId, weaponId, targetPos)
@@ -66,7 +69,7 @@ class UpdateBotDelegate(
             //if target is bot
             if (targetId < 0)
                 ShooterGameIntents
-                    .Hit(botId, weaponId, 10, targetPos, targetId)
+                    .Hit(botId, targetId, 10)
                     .let(hits::add)
 
             updateBot(bot, targetPos)
@@ -129,10 +132,7 @@ class UpdateBotDelegate(
     }
 
     private fun ShooterBotState.getCurrentRoute(): List<Transform>? {
-        val routes = when (playerState.data.team) {
-            PlayerTeam.Red -> settings.botSettings.redTeamRoutes
-            else -> settings.botSettings.blueTeamRoutes
-        }
+        val routes = settings.mapSettings.getRoutes(playerState.data.team)
         return routeIndex?.let(routes::getOrNull)
     }
 

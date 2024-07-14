@@ -42,6 +42,19 @@ fun PlayingState.hit(
             .kills
 
         killerTeamCounter transform { it + 1 }
+
+        val killerTeamDataOptional = PlayingState
+            .teamData
+            .index(Index.map(), killerTeam)
+        val killerTeamData = killerTeamDataOptional
+            .getOrNull(this@hit)
+            ?: return@copy
+        if(killerTeamData.flagPlayerId != receiverId)
+            return@copy
+
+        killerTeamDataOptional.flagStateId set TeamPlayingData.FlagDroppedStateId
+        killerTeamDataOptional.flagPos set receiverState.transform
+        println("dropFlag 5")
     }
 
     return HitResult(newState, hpLoss, true)

@@ -38,7 +38,7 @@ open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private const
 
     private val stateUpdateLock = Any()
 
-    protected fun setState(state: STATE) = synchronized(stateUpdateLock) {
+    protected open fun setState(state: STATE) = synchronized(stateUpdateLock) {
         if (isDisposed)
             return
 

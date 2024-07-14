@@ -31,7 +31,7 @@ class PlayerStateFactory(
                 selectedWeaponId = weaponId,
                 dynamicState = createPlayerPlayingState(pos)
             ),
-            routeIndex = settings.botSettings.findCloseRouteIndex(pos, team),
+            routeIndex = settings.mapSettings.findCloseRouteIndex(pos, team),
             routePointIndex = 0
         )
     }

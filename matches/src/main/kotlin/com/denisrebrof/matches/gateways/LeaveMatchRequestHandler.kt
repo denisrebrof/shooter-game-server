@@ -12,7 +12,7 @@ class LeaveMatchRequestHandler @Autowired constructor(
 ) : WSUserEmptyRequestHandler(WSCommand.LeaveMatch.id) {
     override fun handleMessage(userId: Long): ResponseState {
         val matchId = matchService
-            .getByUserId(userId)
+            .getMatchIdByUserId(userId)
             ?: return ResponseState.False
 
         matchService.removeUser(matchId, userId)

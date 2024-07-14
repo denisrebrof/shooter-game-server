@@ -14,7 +14,6 @@ include("balance")
 include("lobby")
 include("simplestats")
 include("gameresources")
-include("purchases")
 include("weapons")
 
 @Suppress("UnstableApiUsage")

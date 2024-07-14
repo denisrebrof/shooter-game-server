@@ -58,13 +58,28 @@ class ShooterGame private constructor(
         .subscribeDefault { send(Action.LifecycleCompleted) }
         .let(::add)
 
-    override fun onIntentReceived(intent: Intent) = when (intent) {
-        is Intent.SelectWeapon -> mutateState(PlayingState::class) {
-            selectWeapon(intent.playerId, intent.weaponId)
-        }
+//    override fun setState(state: ShooterGameState) {
+//        super.setState(state)
+//        if(state !is PlayingState)
+//            return
+//
+//        val st = state
+//            .teamData
+//            .entries
+//            .firstNotNullOfOrNull { (team, data) -> data.flagPlayerId?.let { team to it } }
+//            ?: return println("Not Found playerFlag")
+//        println("Found playerFlag: ${st.first} - ${st.second}")
+//    }
 
+    override fun onIntentReceived(intent: Intent) = when (intent) {
+        is Intent.SelectWeapon -> mutateState(PlayingState::class) { selectWeapon(intent.playerId, intent.weaponId) }
+        is Intent.HitByBot -> hitByBot(intent)
+        is Intent.TakeFlag -> mutateState(PlayingState::class) { takeFlag(intent.playerId) }
+        is Intent.StoreFlag -> mutateState(PlayingState::class) { storeFlag(intent.playerId) }
+        is Intent.ReturnFlag -> mutateState(PlayingState::class) { returnFlag(intent.playerId, settings) }
+        is Intent.Hit -> hit(intent)
         is Intent.UpdatePos -> mutateState(PlayingState::class) {
-            updatePlayerPos(intent.playerId, intent.pos, intent.verticalLookAngle)
+            updatePlayerPos(intent.playerId, intent.pos, intent.verticalLookAngle, intent.crouching, intent.jumping)
         }
 
         is Intent.Shoot -> updateStateCopy(PlayingState::class) { current ->
@@ -74,8 +89,6 @@ class ShooterGame private constructor(
 
             Action.Shoot(intent.shooterId, intent.weaponId, intent.direction).let(::send)
         }
-
-        is Intent.Hit -> hit(intent)
 
         is Intent.SubmitBotsVisibility -> withState(PlayingState::class) {
             val currentHash = participantIds.hashCode()
@@ -107,6 +120,15 @@ class ShooterGame private constructor(
             .forEach(::send)
     }
 
+    private fun hitByBot(intent: Intent.HitByBot) {
+        val hitIntent = Intent.Hit(
+            shooterId = intent.shooterId,
+            receiverId = intent.receiverId,
+            damage = 10
+        )
+        hit(hitIntent)
+    }
+
     private fun hit(intent: Intent.Hit) = withState(PlayingState::class) {
         val hitResult = with(intent) { hit(shooterId, receiverId, damage) }
         setState(hitResult.state)
@@ -126,10 +148,9 @@ class ShooterGame private constructor(
         .subscribeDefault()
         .let(::add)
 
-    private fun revivePlayer(playerId: Long) = getTypedState(PlayingState::class)
-        ?.let { reviveDelegate.revivePlayer(it, playerId) }
-        ?.let(::setState)
-        ?: Unit
+    private fun revivePlayer(playerId: Long) = updateState(PlayingState::class) {
+        reviveDelegate.revivePlayer(it, playerId)
+    }
 
     private fun createBotUpdatesHandler(): Disposable = handleBotUpdates()
 

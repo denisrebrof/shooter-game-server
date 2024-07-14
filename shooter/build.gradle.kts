@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":matches"))
     implementation(project(":progression"))
     implementation(project(":simplestats"))
+    implementation(project(":weapons"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 

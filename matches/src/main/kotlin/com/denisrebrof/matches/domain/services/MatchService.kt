@@ -3,6 +3,7 @@ package com.denisrebrof.matches.domain.services
 import com.denisrebrof.matches.domain.model.Match
 import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 @Service
 class MatchService(
@@ -10,6 +11,8 @@ class MatchService(
 ) {
     private val matches = Collections.synchronizedMap(mutableMapOf<String, Match>())
     private val participantIdToMatchId = Collections.synchronizedMap(mutableMapOf<Long, String>())
+    private val mapCount = 3
+    private val matchCounter = AtomicInteger(0)
 
     fun create(participants: Set<Long>) {
         val matchId = UUID.randomUUID().toString()
@@ -17,7 +20,9 @@ class MatchService(
             return
 
         val time = Date().time
-        val match = Match(matchId, participants, MAX_PARTICIPANTS, time)
+        val mapId = matchCounter.getAndIncrement() % mapCount
+        val match = Match(matchId, 2, participants, MAX_PARTICIPANTS, time)
+//        val match = Match(matchId, mapId, participants, MAX_PARTICIPANTS, time) //TODO
         matches[matchId] = match
         participants.forEach { participantIdToMatchId[it] = matchId }
         listeners.forEach { listener -> listener.onMatchStarted(match) }
@@ -33,7 +38,9 @@ class MatchService(
 
     fun get(matchId: String) = matches[matchId]
 
-    fun getByUserId(userID: Long) = participantIdToMatchId[userID]
+    fun getMatchIdByUserId(userID: Long) = participantIdToMatchId[userID]
+
+    fun getMatchByUserId(userID: Long) = participantIdToMatchId[userID]?.let(matches::get)
 
     fun hasByUserId(userID: Long): Boolean = participantIdToMatchId.containsKey(userID)
 

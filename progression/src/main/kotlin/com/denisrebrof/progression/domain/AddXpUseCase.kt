@@ -20,7 +20,7 @@ class AddXpUseCase @Autowired constructor(
             xpToNextLevel = getXpToNextLevel(userLevel)
         }
 
-        setXp(userId, xp)
+        setXp(userId, xpToAdd)
         setLevel(userId, userLevel)
     }
 

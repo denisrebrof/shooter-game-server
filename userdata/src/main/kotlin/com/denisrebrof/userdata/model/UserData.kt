@@ -1,8 +1,9 @@
 package com.denisrebrof.userdata.model
 
 import com.denisrebrof.user.domain.model.UserRole
+import com.denisrebrof.weapons.domain.model.DefaultWeaponIds
+import com.denisrebrof.weapons.domain.model.WeaponSlot
 import org.hibernate.Hibernate
-import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -20,6 +21,8 @@ data class UserData(
     val kills: Int = 0,
     val death: Int = 0,
     val level: Int = 1,
+    val primaryWeapon: Long = DefaultWeaponIds.slotToIds.getValue(WeaponSlot.Primary),
+    val secondaryWeapon: Long = DefaultWeaponIds.slotToIds.getValue(WeaponSlot.Secondary),
     val lastClaimedLevel: Int = 1,
     val xp: Int = 0,
     val gamesPlayed: Int = 0,

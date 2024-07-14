@@ -50,21 +50,26 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
     ) = sendUserNotificationUseCase.send(userId, WSCommand.GameState.id, content)
 
     private fun GameStateResponse.Companion.convert(state: ShooterGameState): GameStateResponse {
-        val getKills: (PlayerTeam) -> Int = kills@{
-            val playingKills = ShooterGameState
+        val getTeamStats: (PlayerTeam) -> TeamStateResponse = kills@{
+            val playingTeamData = ShooterGameState
                 .playingState
                 .teamData
                 .index(Index.map(), it)
-                .kills
+                .getOrNull(state)
 
-            val finishedKills = ShooterGameState
+            if (playingTeamData != null)
+                return@kills playingTeamData.toResponse()
+
+            val finishedTeamData = ShooterGameState
                 .finished
-                .teamKills
+                .teamData
                 .index(Index.map(), it)
+                .getOrNull(state)
 
-            return@kills playingKills.getOrNull(state)
-                ?: finishedKills.getOrNull(state)
-                ?: 0
+            if (finishedTeamData != null)
+                return@kills finishedTeamData.toResponse()
+
+            return@kills TeamStateResponse(0, 0, Transform.Zero, false, 0L)
         }
 
         return GameStateResponse(
@@ -72,8 +77,8 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
             playersHash = state.participantIds.hashCode(),
             playerData = state.playersData,
             winnerTeamId = ShooterGameState.finished.winnerTeam.getOrNull(state)?.id ?: 0,
-            redTeamKills = getKills(PlayerTeam.Red),
-            blueTeamKills = getKills(PlayerTeam.Blue)
+            redTeamState = getTeamStats(PlayerTeam.Red),
+            blueTeamState = getTeamStats(PlayerTeam.Blue),
         )
     }
 
@@ -83,8 +88,33 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
         val playersHash: Int,
         val playerData: List<PlayerDataResponse>,
         val winnerTeamId: Int,
-        val redTeamKills: Int,
-        val blueTeamKills: Int,
+        val redTeamState: TeamStateResponse,
+        val blueTeamState: TeamStateResponse,
+    )
+
+    @Serializable
+    private data class TeamStateResponse(
+        val teamFlags: Int,
+        val teamKills: Int,
+        val flagPos: Transform,
+        val flagHasOwner: Boolean,
+        val flagOwnerId: Long
+    )
+
+    private fun TeamPlayingData.toResponse() = TeamStateResponse(
+        teamFlags = flagsTaken,
+        teamKills = kills,
+        flagPos = flagPos,
+        flagHasOwner = flagPlayerId != null,
+        flagOwnerId = flagPlayerId ?: 0L,
+    )
+
+    private fun FinishedTeamData.toResponse() = TeamStateResponse(
+        teamFlags = flagsTaken,
+        teamKills = kills,
+        flagPos = Transform.Zero,
+        flagHasOwner = false,
+        flagOwnerId = 0L,
     )
 
     @Serializable
@@ -97,7 +127,9 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
         val hp: Int,
         val pos: Transform,
         val verticalLookAngle: Float,
-        val selectedWeaponId: Long
+        val selectedWeaponId: Long,
+        val crouching: Boolean,
+        val jumping: Boolean,
     )
 
     private fun PlayerDataResponse.Companion.fromDataOnly(
@@ -112,7 +144,9 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
         hp = 0,
         pos = Transform.Zero,
         verticalLookAngle = 0f,
-        selectedWeaponId = 0L
+        selectedWeaponId = 0L,
+        crouching = false,
+        jumping = false
     )
 
     private val ShooterGameState.playersData: List<PlayerDataResponse>
@@ -135,7 +169,9 @@ class ShooterGameNotificationsUseCase @Autowired constructor(
                         ?: killedState?.killPosition
                         ?: Transform.Zero,
                     verticalLookAngle = playingState?.verticalLookAngle ?: 0f,
-                    selectedWeaponId = state.selectedWeaponId
+                    selectedWeaponId = state.selectedWeaponId,
+                    crouching = playingState?.crouching ?: false,
+                    jumping = playingState?.jumping ?: false
                 )
             }
 

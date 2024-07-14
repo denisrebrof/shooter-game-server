@@ -1,7 +1,6 @@
 package com.denisrebrof.progression.gateways
 
 import com.denisrebrof.commands.domain.model.ResponseState
-import com.denisrebrof.commands.domain.model.UserNotFoundDefaultResponse
 import com.denisrebrof.commands.domain.model.WSCommand
 import com.denisrebrof.commands.domain.model.toResponse
 import com.denisrebrof.progression.domain.ClaimLevelUseCase
@@ -17,13 +16,16 @@ class UnclaimedLevelDataRequestHandler @Autowired constructor(
 
     override fun handleMessage(userId: Long): ResponseState {
         val data = claimLevelUseCase.getUnclaimedLevelsData(userId) ?: return ResponseState.NoResponse
-        return UnclaimedLevelRewardsResponse(data.lastLevel, data.currentLevel, data.rewards).toResponse()
+        if (data.weaponRewards.isEmpty()) 
+            return ResponseState.NoResponse
+
+        return UnclaimedLevelRewardsResponse(data.lastLevel, data.currentLevel, data.weaponRewards).toResponse()
     }
 
     @Serializable
     data class UnclaimedLevelRewardsResponse(
         val lastLevel: Int,
         val currentLevel: Int,
-        val rewards: String
+        val weaponRewards: List<Long>
     )
 }

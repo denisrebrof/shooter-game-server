@@ -1,5 +1,6 @@
 package com.denisrebrof.balance.data
 
+import com.denisrebrof.balance.domain.model.CurrencyType
 import com.denisrebrof.balance.domain.repositories.IUserCurrencyRepository
 
 object EnumerationUserCurrencyRepository : IUserCurrencyRepository {
