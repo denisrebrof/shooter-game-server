@@ -13,12 +13,12 @@ val playerIds = listOf(1L, 2L)
 class ShooterGameTest {
 
     private val defaultMap = ShooterGameSettings.MapSettings(
-        redTeamSpawnPos = listOf(),
-        blueTeamSpawnPos =  listOf(),
+        redTeamSpawnPos = listOf(Transform.Zero),
+        blueTeamSpawnPos =  listOf(Transform.Zero),
         redTeamFlagPos = Transform.Zero,
         blueTeamFlagPos = Transform.Zero,
-        redTeamRoutes =  listOf(),
-        blueTeamRoutes =  listOf()
+        redTeamRoutes =  listOf(listOf(Transform.Zero)),
+        blueTeamRoutes =  listOf(listOf(Transform.Zero))
     )
 
     @Test
@@ -42,7 +42,7 @@ class ShooterGameTest {
             .stateFlow
             .ofType(PlayingState::class.java)
             .delay(100L, TimeUnit.MILLISECONDS)
-            .map { ShooterGameIntents.Hit(1L, 1L, 120) }
+            .map { ShooterGameIntents.Hit(1L, 2L, 120) }
             .doOnNext(game::submit)
             .blockingFirst()
 
