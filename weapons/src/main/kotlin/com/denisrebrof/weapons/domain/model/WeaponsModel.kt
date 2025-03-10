@@ -51,6 +51,7 @@ data class WeaponInfo(
     val nameLocalizationKey: String,
     val availableFromLevel: Int,
     val automatic: Boolean,
+    val premium: Boolean,
     val settingsLevels: List<WeaponSettings>
 )
 

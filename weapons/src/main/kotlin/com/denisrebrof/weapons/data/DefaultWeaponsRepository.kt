@@ -15,6 +15,7 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "beretta_57",
             automatic = true,
             availableFromLevel = 0,
+            premium = false,
             settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 600,
@@ -31,6 +32,7 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "gewehr_43",
             automatic = false,
             availableFromLevel = 0,
+            premium = false,
             settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 300,
@@ -47,7 +49,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "mp_40",
             automatic = true,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = false,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 500,
                     damage = 20,
@@ -63,7 +66,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "ppsh_41",
             automatic = true,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = false,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 900,
                     damage = 20,
@@ -79,7 +83,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "sks",
             automatic = false,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = false,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 40,
                     damage = 40,
@@ -95,7 +100,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "stg_44",
             automatic = true,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = false,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 500,
                     damage = 25,
@@ -111,7 +117,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "tokarev",
             automatic = false,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = false,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 600,
                     damage = 20,
@@ -127,7 +134,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "walter",
             automatic = false,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = false,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 480,
                     damage = 18,
@@ -143,7 +151,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "beretta_57_gold",
             automatic = true,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = true,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 720,
                     damage = 26,
@@ -159,7 +168,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "gewehr_43_gold",
             automatic = false,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = true,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 360,
                     damage = 42,
@@ -175,7 +185,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "mp_40_gold",
             automatic = true,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = true,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 600,
                     damage = 24,
@@ -191,7 +202,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "ppsh_41_gold",
             automatic = true,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = true,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 1080,
                     damage = 24,
@@ -207,7 +219,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "sks_gold",
             automatic = false,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = true,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 48,
                     damage = 48,
@@ -223,7 +236,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "stg_44_gold",
             automatic = true,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = true,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 600,
                     damage = 30,
@@ -239,7 +253,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "tokarev_gold",
             automatic = false,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = true,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 720,
                     damage = 24,
@@ -255,7 +270,8 @@ class DefaultWeaponsRepository : IWeaponInfoRepository {
             nameLocalizationKey = "walter_gold",
             automatic = false,
             availableFromLevel = 0,
-            settingsLevels = listOf(
+            premium = true,
+                settingsLevels = listOf(
                 WeaponSettings(
                     rpm = 576,
                     damage = 21,

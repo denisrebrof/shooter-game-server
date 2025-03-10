@@ -21,7 +21,7 @@ class MatchService(
 
         val time = Date().time
         val mapId = matchCounter.getAndIncrement() % mapCount
-        val match = Match(matchId, 2, participants, MAX_PARTICIPANTS, time)
+        val match = Match(matchId, 1, participants, MAX_PARTICIPANTS, time)
 //        val match = Match(matchId, mapId, participants, MAX_PARTICIPANTS, time) //TODO
         matches[matchId] = match
         participants.forEach { participantIdToMatchId[it] = matchId }

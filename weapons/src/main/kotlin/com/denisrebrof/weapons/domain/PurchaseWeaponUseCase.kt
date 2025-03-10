@@ -32,10 +32,12 @@ class PurchaseWeaponUseCase @Autowired constructor(
         if (userLevel < weaponInfo.availableFromLevel)
             return false
 
-        val purchaseCost = weaponInfo.settingsLevels[0].cost
-        val balanceChangeResult = decreaseBalanceUseCase.decrease(userId, purchaseCost, CurrencyType.Primary)
-        if (!balanceChangeResult)
-            return false
+        if (!weaponInfo.premium) {
+            val purchaseCost = weaponInfo.settingsLevels[0].cost
+            val balanceChangeResult = decreaseBalanceUseCase.decrease(userId, purchaseCost, CurrencyType.Primary)
+            if (!balanceChangeResult)
+                return false
+        }
 
         val playerWeaponInfo = PlayerWeaponInfo(weaponId)
         playerWeaponsRepository.setWeapon(userId, playerWeaponInfo)

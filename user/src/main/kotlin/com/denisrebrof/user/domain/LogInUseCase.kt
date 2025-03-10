@@ -32,6 +32,8 @@ class LogInUseCase @Autowired constructor(
     }
 
     private fun identityLogin(identity: UserIdentity, sessionId: String): LoginResult {
+        updateExistingUserIdentity(identity, sessionId)
+
         val user = getOrCreateUserUseCase
             .getOrCreate(identity)
             ?: return LoginResult.Failed
@@ -40,6 +42,11 @@ class LogInUseCase @Autowired constructor(
         sessionMappingRepository.addMapping(user.id, sessionId)
         return LoginResult.Success("", user.id)
     }
+
+    private fun updateExistingUserIdentity(identity: UserIdentity, sessionId: String) = sessionMappingRepository
+        .getMapping(sessionId)
+        ?.let { userId -> userRepository.addIdentity(userId, identity) }
+        ?: false
 
     private fun basicLogin(username: String, password: String): LoginResult {
         val identity = UserIdentity(username, UserIdentityType.Username)

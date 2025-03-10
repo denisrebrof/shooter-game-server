@@ -47,4 +47,6 @@ enum class WSCommand(val id: Long) {
 
     IntentHitByBot(33L),
     IntentFlagAction(34L),
+
+    PurchaseAllWeapons(35L),
 }

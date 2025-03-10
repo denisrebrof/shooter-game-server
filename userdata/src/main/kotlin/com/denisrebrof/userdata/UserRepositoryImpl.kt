@@ -31,6 +31,19 @@ class UserRepositoryImpl @Autowired constructor(
 
     override fun find(identity: UserIdentity): User? = findData(identity)?.toUser()
 
+    override fun addIdentity(userId: Long, identity: UserIdentity): Boolean {
+        var data = repository.findUserDataById(userId)?: return false
+        data = when(identity.type) {
+            UserIdentityType.Id -> return false
+            UserIdentityType.LocalId -> return false
+            UserIdentityType.YandexId -> if(data.yandexId.isEmpty()) data.copy(yandexId = identity.id) else return false
+            UserIdentityType.Token -> return false
+            UserIdentityType.Username -> return false
+        }
+        repository.save(data)
+        return true
+    }
+
     private fun findData(identity: UserIdentity): UserData? = when (identity.type) {
         UserIdentityType.Id -> identity.id.toLongOrNull()?.let(repository::findUserDataById)
         UserIdentityType.Username -> repository.findUserDataByUsername(identity.id).firstOrNull()
