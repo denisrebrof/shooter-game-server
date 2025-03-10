@@ -1,4 +1,4 @@
-rootProject.name = "spring-boot-test"
+rootProject.name = "shooter-game-server"
 
 include("progression")
 include("games")
