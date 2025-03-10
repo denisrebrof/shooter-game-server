@@ -11,6 +11,16 @@ import java.util.concurrent.TimeUnit
 val playerIds = listOf(1L, 2L)
 
 class ShooterGameTest {
+
+    private val defaultMap = ShooterGameSettings.MapSettings(
+        redTeamSpawnPos = listOf(),
+        blueTeamSpawnPos =  listOf(),
+        redTeamFlagPos = Transform.Zero,
+        blueTeamFlagPos = Transform.Zero,
+        redTeamRoutes =  listOf(),
+        blueTeamRoutes =  listOf()
+    )
+
     @Test
     fun testGame() {
         val settings = ShooterGameSettings(
@@ -23,6 +33,7 @@ class ShooterGameTest {
                 defaultWeaponId = 1L,
                 fillWithBotsToTeamSize = 3,
             ),
+            mapSettings = defaultMap
         )
         val game = ShooterGame
             .create(playerIds, settings)
@@ -34,6 +45,7 @@ class ShooterGameTest {
             .map { ShooterGameIntents.Hit(1L, 1L, 120) }
             .doOnNext(game::submit)
             .blockingFirst()
+
         val finished = game.stateFlow.ofType(Finished::class.java).blockingFirst()
         assert(finished.finishedPlayers[1L]?.kills == 1)
         assert(finished.finishedPlayers[2L]?.death == 1)
@@ -52,7 +64,9 @@ class ShooterGameTest {
             botSettings = ShooterGameSettings.BotSettings(
                 defaultWeaponId = 1L,
                 fillWithBotsToTeamSize = 3,
+
             ),
+            mapSettings = defaultMap
         )
         val game = ShooterGame
             .create(playerIds, settings)
