@@ -1,5 +1,7 @@
 ## Server for my WebGL shooter game
 
+[🚀 Try Game Here (⚠ **Check ReadMe First!** )](https://github.com/denisrebrof/shooter-game-webgl-client-pages-build)
+
 ### Download: [Jar Release Link](https://github.com/denisrebrof/shooter-game-server/releases/latest/shooter-game-server.jar)
 
 Steps to run server locally:
