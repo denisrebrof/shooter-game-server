@@ -32,8 +32,6 @@ open class MVIGameHandler<STATE : Any, INTENT : Any, ACTION : Any> private const
 
     fun submit(intent: INTENT) = onIntentReceived(intent)
 
-    protected open fun onCreateLifecycle(): Disposable = Disposable.disposed()
-
     protected open fun onIntentReceived(intent: INTENT) = Unit
 
     private val stateUpdateLock = Any()

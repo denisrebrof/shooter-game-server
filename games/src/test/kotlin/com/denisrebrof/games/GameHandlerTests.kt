@@ -50,7 +50,7 @@ class GameHandlerTests {
         playerIds: Set<Long>
     ) : MVIGameHandler<SampleGameState, SampleGameAddScoreIntent, SampleGameAction>(SampleGameState.Preparing(playerIds)) {
 
-        override fun onCreateLifecycle(): Disposable = Maybe
+        fun start() = Maybe
             .timer(1000L, TimeUnit.MILLISECONDS)
             .map { state }
             .ofType(SampleGameState.Preparing::class.java)
@@ -61,6 +61,7 @@ class GameHandlerTests {
                 )
             }
             .subscribeDefault(::setState)
+            .also(::add)
 
         override fun onIntentReceived(intent: SampleGameAddScoreIntent) {
             val playingState = state as? SampleGameState.Playing ?: return
@@ -81,7 +82,7 @@ class GameHandlerTests {
     @Test
     fun testSampleGame() {
         val playerIds = setOf(0L, 1L)
-        val gameHandler = SampleGame(playerIds)
+        val gameHandler = SampleGame(playerIds).also(SampleGame::start)
 
         gameHandler
             .stateFlow
@@ -102,6 +103,9 @@ class GameHandlerTests {
             .blockingGet()!!
 
         assert(finishedState.winnerId == 0L)
+
+        gameHandler.dispose()
+
         assert(playingStateSubscription.isDisposed)
     }
 }
